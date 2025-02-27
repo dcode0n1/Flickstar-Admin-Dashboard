@@ -1,0 +1,16 @@
+  {
+    "extends": [
+      "next/core-web-vitals",
+      "plugin:@typescript-eslint/recommended",
+      "plugin:@typescript-eslint/recommended-requiring-type-checking",
+      "plugin:@typescript-eslint/eslint-recommended",
+      "plugin:import/recommended"
+    ],
+    "rules": {
+      "@typescript-eslint/no-unused-vars": "off", // Disable unused variables rule
+      "@typescript-eslint/no-empty-interface": "off", // Allow empty interfaces
+      "@next/next/no-img-element": "off", // Allow <img> tags instead of <Image> component
+      "@typescript-eslint/no-wrapper-object-types": "off", // Disable warnings for wrapper types like Boolean
+      "@typescript-eslint/no-explicit-any": "off" // Allow usage of 'any' type
+    }
+  }
