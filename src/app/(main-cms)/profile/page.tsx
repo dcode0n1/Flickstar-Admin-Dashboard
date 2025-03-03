@@ -117,8 +117,8 @@ export default function Profile() {
         }
     };
 
-    if (error) return <div>Failed to load</div>;
-    if (!data) return <div>Loading...</div>;
+    // if (error) return <div>Failed to load</div>;
+    // if (!data) return <div>Loading...</div>;
 
     return (
         <div className="relative bg-slate-50">

@@ -46,7 +46,7 @@ export default function CardWrapper({ name, className, btnLink = "#", btnText, c
                     </Link>
                 )}
             </div>
-            {icon && <span className="mr-2">{icon}</span>}
+            {icon && <span className="mr-4">{icon}</span>}
         </div>
         {children}
     </div >)

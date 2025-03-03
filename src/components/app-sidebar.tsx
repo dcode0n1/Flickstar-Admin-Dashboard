@@ -47,7 +47,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={data.navMenu} parentText="MENU" />
         <NavMain items={data.media} parentText="MEDIA" />
-        <NavMain items={data.navReport} parentText="USER, REPORT AND SUPPORT" />
+        <NavMain items={data.navReport} parentText="USER, REPORT AND FEEDBACK" />
         <NavMain items={data.navSystemSettings} parentText="SYSTEM SETTING" />
       </SidebarContent>
       <SidebarRail />

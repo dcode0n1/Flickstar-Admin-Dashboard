@@ -158,7 +158,8 @@ export default function MediaControlSongList() {
             <div className="flex flex-1 flex-col m-4">
                 <CardWrapper
                     name="Song List"
-                    viewBtn={false}
+                    btnText="Add New Songs"
+                    btnLink="/media-control/song/create-song"
                     className="p-2"
                 >
                     <div className="flex flex-wrap items-center m-2 gap-4 md:flex-2">

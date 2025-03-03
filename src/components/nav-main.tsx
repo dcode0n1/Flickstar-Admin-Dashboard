@@ -154,8 +154,8 @@ export function NavMain({ items, parentText }: {
             {item.items ? (
               state === "collapsed" ? renderCollapsedView(item) : renderExpandedView(item)
             ) : (
-              <Link href={item.url}>
-                <SidebarMenuButton className={isLinkActive(item.url) ? "bg-primary/10 text-primary" : ""}>
+                <Link href={item.url} className={isLinkActive(item.url) ? "bg-primary/10 text-primary" : ""}>
+                <SidebarMenuButton >
                   {item.icon && <item.icon className={isLinkActive(item.url) ? "text-primary" : ""} />}
                   <span>{item.title}</span>
                 </SidebarMenuButton>

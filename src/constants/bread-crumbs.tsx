@@ -44,6 +44,11 @@ export const MediaControlQuestListBreadCrumbs = [
     { name: "Quest" }
 ]
 
+export const MediaControlQuestApplicantListBreadCrumbs = [
+    { name: "Home", link: "/dashboard" },
+    { name: "Quest Applicant" }
+]
+
 
 export const MediaControlSongListBreadCrumbs = [
     { name: "Home", link: "/dashboard" },
@@ -98,6 +103,11 @@ export const ReportStoryListBreadcrumbs = [
     { name: "Reported Stories" }
 ]
 
+export const ReportUserListBreadCrumbs  =  [
+    { name: "Home", link: "/dashboard" },
+    { name: "Reported Users" }  
+]
+
 
 export const UserListBreadCrumbs = [
     { name: "Home", link: "/dashboard" },
@@ -107,5 +117,105 @@ export const UserListBreadCrumbs = [
 export const UserDetailsBreadCrumbs = [
     { name: "Home", link: "/dashboard" },
     { name: "Users", link: "/users/list" },
-    { name: "Edit" }
+    { name: "Details" }
+]
+
+
+export const SendMailBreadCrumbs = [
+    { name: "Home", link: "/dashboard" },
+    { name: "Send Mail" }
+]
+
+
+export const SendNotificationBreadCrumbs = [
+    { name: "Home", link: "/dashboard" },
+    { name: "Send Notification" }
+]
+
+
+
+export const MediaControlFlickDetailBreadCrumbs = [
+    { name: "Home", link: "/dashboard" },
+    { name: "Flick", link: "list" },
+    { name: "Details" }
+]
+
+export const MediaControlQuestDetailBreadCrumbs = [
+    { name: "Home", link: "/dashboard" },
+    { name: "Quest", link: "list" },
+    { name: "Details" }
+]
+
+
+export const MediaControlCreateQuestBreadCrumbs = [
+    { name: "Home", link: "/dashboard" },
+    { name: "Quest", link: "list" },
+    { name: "Create" }
+]
+
+
+export const MediaControlCreateSongsBreadCrumbs  =  [
+    { name: "Home", link: "/dashboard" },
+    { name: "Songs", link: "list" },
+    { name: "Create" }
+]
+
+export const MediaControlCommentDetailsBreadCrumbs = [
+    { name: "Home", link: "/dashboard" },
+    { name: "Comment", link: "list" },
+    { name: "Details" }
+]
+
+
+export const ManageFeedbacksListBreadCrumbs  =[
+    { name: "Home", link: "/dashboard" },
+    { name: "Feedback" }
+]
+
+
+
+export const ReportAudioReplyBreadCrumbs = [
+    { name: "Home", link: "/dashboard" },
+    { name: "Reported Audio", link: "list" },
+    { name: "Reply" }
+]
+
+
+
+export const ReportCommentReplyBreadCrumbs = [
+    { name: "Home", link: "/dashboard" },
+    { name: "Reported Comments", link: "list" },
+    { name: "Reply" }
+]
+
+export const ReportFlickReplyBreadCrumbs = [
+    { name: "Home", link: "/dashboard" },
+    { name: "Reported Flicks", link: "list" },
+    { name: "Reply" }
+]
+
+export const ReportQuestReplyBreadCrumbs = [
+    { name: "Home", link: "/dashboard" },
+    { name: "Reported Quests", link: "list" },
+    { name: "Reply" }
+]
+
+export const ReportSongReplyBreadCrumbs = [
+    { name: "Home", link: "/dashboard" },
+    { name: "Reported Songs", link: "list" },
+    { name: "Reply" }
+]
+
+
+export const ReportStoryReplyBreadCrumbs  =  [
+    { name: "Home", link: "/dashboard" },
+    { name: "Reported Stories", link: "list" },
+    { name: "Reply" }
+]
+
+
+export const ReportUserReplyBreadCrumbs = [
+    { name: "Home", link: "/dashboard" },
+    { name: "Reported Users", link: "list" },
+    { name: "Reply" }
 ]

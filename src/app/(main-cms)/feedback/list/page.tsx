@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import CardWrapper from "@/components/Card";
 import CustomBreakCrumb from "@/components/ui/custom-breadcrumbs";
-import { staffListBreadCrumbData } from "@/constants/bread-crumbs";
+import { ManageFeedbacksListBreadCrumbs } from "@/constants/bread-crumbs";
 import { RiPencilFill } from "@/components/icons/RiPencilFill";
 import { RiDeleteBinLine } from "@/components/icons/RiDeleteBinLine";
 import { baseURL } from "@/lib/axioxWithAuth";
@@ -10,13 +10,17 @@ import Link from "next/link";
 import useSWR from "swr";
 import { getFetcher } from "@/lib/fetcher";
 import { toast } from "sonner";
-import {  MoveDown, MoveUp, WifiOff } from "lucide-react";
+import { Clock3, MoveDown, MoveUp, WifiOff } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import dynamic from "next/dynamic";
 import { usePermissionStore } from "@/store/permission-store";
-import { StaffListHeadings } from "@/constants/table-headings";
+import { FeedbackListHeadings } from "@/constants/table-headings";
+import { RiSearchLine } from "@/components/icons/RiSearchLine";
+import { RiEqualizerFill } from "@/components/icons/RiEqualizerFill";
+import { RiRefreshLine } from "@/components/icons/RiRefreshLine_short";
 const NotFound = dynamic(() => import("@/components/TableNoData/noDataFound"), { ssr: false });
-export default function StaffList() {
+
+export default function FeedbackList() {
     const [searchTerm, setSearchTerm] = useState("");
     const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
     const [skip, setSkip] = useState(0);
@@ -39,6 +43,7 @@ export default function StaffList() {
         params.append("skip", skip.toString());
         return `${baseURL}/staff/get-all-staff?${params.toString()}`;
     };
+    ;
     const { data, error, isLoading, mutate } = useSWR<ApiResponse>(
         buildApiUrl(),
         getFetcher,
@@ -104,36 +109,7 @@ export default function StaffList() {
             mutate();
         }
     };
-    const handleUpdateStatusStaff = async (staffId: string, currentStatus: boolean) => {
-        if (!isOnline) {
-            toast.error("Cannot update status while offline");
-            return;
-        }
-        try {
-            mutate(
-                (currentData: ApiResponse | undefined) => currentData ? {
-                    ...currentData,
-                    STAFF: currentData.STAFF.map(staff =>
-                        staff._id === staffId
-                            ? { ...staff, status: !currentStatus }
-                            : staff
-                    )
-                } : currentData,
-                false
-            );
-            const response = await fetch(`${baseURL}/staff/change-status/${staffId}`, {
-                method: "PATCH",
-                headers: { 'Content-Type': 'application/json' },
-                credentials: 'include'
-            });
-            if (!response.ok) throw new Error('Failed to update status');
-            toast.success("Status updated successfully");
-            mutate();
-        } catch (error) {
-            toast.error("Failed to update status");
-            mutate();
-        }
-    };
+
     // Filter staff data based on search term
     const filteredStaff = data?.STAFF.filter(staff =>
         staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -176,59 +152,52 @@ export default function StaffList() {
     return (
         <div className="flex flex-1 flex-col bg-slate-100">
             <div className="align-center flex justify-between p-4 border-b shadow-md bg-white">
-                <h1 className="text-sm font-bold text-gray-800">MANAGE STAFF</h1>
-                <CustomBreakCrumb data={staffListBreadCrumbData} />
+                <h1 className="text-sm font-bold text-gray-800">MANAGE FEEDBACKS</h1>
+                <CustomBreakCrumb data={ManageFeedbacksListBreadCrumbs} />
             </div>
             <div className="flex flex-1 flex-col m-4">
                 <CardWrapper
-                    name="Staff List"
+                    name="Feedback List"
                     viewBtn={false}
-                    btnText= "Add New Staff"
-                    btnLink="/staff/create-staff"
                     className="p-2"
                 >
-                    <div className="flex justify-between items-center m-4">
-                        {/* <div>
-                            <label className="text-sm">
-                                Show
-                                <select className="mx-2 p-1 border rounded">
-                                    <option>10</option>
-                                    <option>25</option>
-                                    <option>50</option>
-                                    <option>100</option>
-                                </select>
-                                Entries
-                            </label>
-                        </div> */}
-                        <div>
-                            <label className="text-sm">
-                                Search:
-                                <input
-                                    type="text"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            handleSearch();
-                                        }
-                                    }}
-                                    className="ml-2 p-1 border rounded"
-                                    placeholder="Search by name, username, or email..."
-                                    disabled={!isOnline}
-                                />
-                            </label>
+                    <div className="flex flex-wrap items-center m-2 gap-4 md:flex-2">
+                        <div className="relative flex items-center w-full sm:w-64 p-1 bg-white border rounded-sm">
+                            <RiSearchLine className="absolute left-0 mx-2" />
+                            <input
+                                type="text"
+                                name="search"
+                                className="w-full pl-10 py-1 text-sm text-gray-700 placeholder-gray-500 bg-transparent border-none focus:outline-none focus:ring-5 focus:ring-indigo-600"
+                                placeholder="Search name, email, phone"
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                            />
                         </div>
+                        <div className="relative flex items-center w-full  sm:w-64 p-1 bg-white border rounded-sm">
+                            <Clock3 className="absolute left-0 mx-2 w-4 text-gray-500" />
+                            <input
+                                type="text"
+                                name="search"
+                                className="w-full pl-10 py-1 text-sm text-gray-700 placeholder-gray-500 bg-transparent border-none focus:outline-none focus:ring-5 focus:ring-indigo-600"
+                                placeholder="Search by date"
+                            />
+                        </div>
+                        <button className="bg-purple-700 px-10 py-1.5 ml-2 rounded-sm flex items-center transition duration-300 ease-in-out hover:bg-opacity-80">
+                            <RiEqualizerFill /><span className="ml-1 text-white">Search</span>
+                        </button>
+                        <button className="bg-red-400 px-10 py-1.5 ml-2 rounded-sm flex items-center transition duration-300 ease-in-out hover:bg-opacity-80">
+                            <RiRefreshLine /><span className="ml-1 text-white"> Reset</span>
+                        </button>
                     </div>
                     <div className="overflow-x-auto grid grid-cols-1">
                         <Table>
                             <TableHeader>
                                 <TableRow>
-                                    {StaffListHeadings.map((heading, index) => {
+                                    {FeedbackListHeadings.map((heading, index) => {
                                         if (heading.display === "Options") {
                                             // return hasAnyPermission(["deleteAdmin", "updateAdmin"]) ?(
-                                                <TableHead key={index} className="text-xs font-semibold text-gray-600">
-                                                    {heading.display}
-                                                </TableHead>
+                                            <TableHead key={index} className="text-xs font-semibold text-gray-600">
+                                                {heading.display}
+                                            </TableHead>
                                             // ) : null;
                                         }
                                         return (
@@ -267,7 +236,7 @@ export default function StaffList() {
                             {isLoading ? (
                                 <TableBody>
                                     <TableRow>
-                                        <TableCell colSpan={StaffListHeadings.length} className="text-center py-6">
+                                        <TableCell colSpan={FeedbackListHeadings.length} className="text-center py-6">
                                             <div className="flex justify-center items-center">
                                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-800" />
                                             </div>
@@ -277,7 +246,7 @@ export default function StaffList() {
                             ) : error || !isOnline ? (
                                 <TableBody>
                                     <TableRow>
-                                        <TableCell colSpan={StaffListHeadings.length} className="text-center py-6">
+                                            <TableCell colSpan={FeedbackListHeadings.length} className="text-center py-6">
                                             <div className="flex flex-col items-center justify-center gap-2">
                                                 <WifiOff className="w-8 h-8 text-red-500" />
                                                 <p className="text-gray-500">Unable to load staff data</p>
@@ -294,7 +263,7 @@ export default function StaffList() {
                             ) : !filteredStaff?.length ? (
                                 <TableBody>
                                     <TableRow>
-                                        <TableCell colSpan={StaffListHeadings.length} className="text-center py-6">
+                                                <TableCell colSpan={FeedbackListHeadings.length} className="text-center py-6">
                                             <NotFound />
                                             <p className="text-gray-500 mt-2">No staff members found</p>
                                         </TableCell>
@@ -345,28 +314,28 @@ export default function StaffList() {
                                             </TableCell>
                                             {/* {hasAnyPermission(["updateAdmin", "deleteAdmin"]) && s */}
                                             (
-                                                <TableCell className="text-sm">
-                                                    <div className="flex space-x-2">
-                                                        {/* {hasPermission("updateAdmin") &&  */}
-                                                        <Link
-                                                            href={`/staff/${staff._id}`}
-                                                            className={`text-yellow-500 hover:text-yellow-600 ${!isOnline ? 'pointer-events-none opacity-50' : ''}`}
-                                                        >
-                                                            <RiPencilFill className="h-5 w-5" />
-                                                        </Link>
-                                                        {/* } */}
-                                                        {/* {hasPermission("deleteAdmin") && */}
-                                                         (
-                                                            <button
-                                                                onClick={() => handleDeleteStaff(staff._id)}
-                                                                disabled={!isOnline}
-                                                                className={`text-red-500 hover:text-red-600 ${!isOnline ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                                            >
-                                                                <RiDeleteBinLine className="h-5 w-5" />
-                                                            </button>)
-                                                            {/* } */}
-                                                    </div>
-                                                </TableCell>
+                                            <TableCell className="text-sm">
+                                                <div className="flex space-x-2">
+                                                    {/* {hasPermission("updateAdmin") &&  */}
+                                                    <Link
+                                                        href={`/staff/${staff._id}`}
+                                                        className={`text-yellow-500 hover:text-yellow-600 ${!isOnline ? 'pointer-events-none opacity-50' : ''}`}
+                                                    >
+                                                        <RiPencilFill className="h-5 w-5" />
+                                                    </Link>
+                                                    {/* } */}
+                                                    {/* {hasPermission("deleteAdmin") && */}
+                                                    (
+                                                    <button
+                                                        onClick={() => handleDeleteStaff(staff._id)}
+                                                        disabled={!isOnline}
+                                                        className={`text-red-500 hover:text-red-600 ${!isOnline ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                    >
+                                                        <RiDeleteBinLine className="h-5 w-5" />
+                                                    </button>)
+                                                    {/* } */}
+                                                </div>
+                                            </TableCell>
                                             )
                                         </TableRow>
                                     ))}

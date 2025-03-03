@@ -17,7 +17,6 @@ export const data = {
                 {
                     title: "Staffs",
                     url: "/staff/list",
-                    permission: "viewAdmin"
                 },
                 {
                     title: "Roles",
@@ -39,8 +38,18 @@ export const data = {
         },
         {
             title: "Quest",
-            url: "/media-control/quest/list",
-            icon: HandCoinsIcon
+            url: "#",
+            icon: HandCoinsIcon,
+            items: [
+                {
+                    title: "Quests",
+                    url: "/media-control/quest/list",
+                },
+                {
+                    title: "Quest Applicants",
+                    url: "/media-control/quest-applicant/list",
+                },
+            ],
         },
         {
             title: "Story",
@@ -65,8 +74,8 @@ export const data = {
     ],
     navReport: [
         {
-            title: "Support Tickets",
-            url: "/report/support-ticket/list",
+            title: "Feedbacks",
+            url: "/feedback/list",
             icon: Headset,
         },
         {
@@ -74,6 +83,10 @@ export const data = {
             url: "#",
             icon: FileText,
             items: [
+                {
+                    title: "User",
+                    url: "/report/user/list",
+                },
                 {
                     title: "Flick",
                     url: "/report/flick/list",
@@ -94,6 +107,7 @@ export const data = {
                     title: "Audio",
                     url: "/report/audio/list",
                 },
+                
             ]
         }
     ],

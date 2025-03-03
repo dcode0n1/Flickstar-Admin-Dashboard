@@ -34,6 +34,17 @@ export const MediaControlQuestListHeadings = [
     { display: "Options", key: "options" }
 ]
 
+
+export const MediaControlQuestApplicantListHeadings = [
+    { display: "#", key: "index" },
+    { display: "User", key: "username", sortable: true },
+    { display: "Description", key: "description", sortable: true },
+    { display: "Partial Allowance", key: "partialAllowance", sortable: true },
+    { display: "Status", key: "status", sortable: true },
+    { display: "Suspended", key: "suspended", sortable: true },
+    { display: "Options", key: "options" }
+]
+
 export const MediaControlStoryListHeadings = [
     { display: "#", key: "index" },
     { display: "Caption ", key: "captionAndThumbnail", sortable: true },
@@ -69,6 +80,8 @@ export const MediaControlAudioListHeadings = [
 ]
 
 
+
+
 export const MediaControlCommentListHeadings = [
     { display: "#", key: "index" },
     { display: "User", key: "username", sortable: true },
@@ -82,11 +95,10 @@ export const MediaControlCommentListHeadings = [
 
 export const ReportCommentListHeadings = [
     { display: "#", key: "index" },
-    { display: "User", key: "username", sortable: true },
-    { display: "Reference", key: "parentCommentOrFlick" },
+    { display: "User", key: "nameAndIcon", sortable: true },
     { display: "Comment", key: "comment" },
-    { display: "Time", key: "createdAt", sortable: true },
-    { display: "Suspended", key: "suspended", sortable: true },
+    { display: "Message", key: "message", sortable: true },
+    { display: "Created At", key: "createdAt", sortable: true },
     { display: "Options", key: "options" }
 ]
 
@@ -94,26 +106,17 @@ export const ReportCommentListHeadings = [
 export const ReportAudioListHeadings = [
     { display: "#", key: "index" },
     { display: "User", key: "nameAndIcon", sortable: true },
-    { display: "Audio", key: "url" },
+    { display: "Audio", key: "audio" },
     { display: "Message", key: "message", sortable: true },
     { display: "Status", key: "status", sortable: true },
     { display: "Options", key: "options" }
 ]
 
-export const ReportSongListHeadings = [
-    { display: "#", key: "index" },
-    { display: "User", key: "username", sortable: true },
-    { display: "Name", key: "nameAndIcon", sortable: true },
-    { display: "Song", key: "url" },
-    { display: "Message", key: "message", sortable: true },
-    { display: "Status", key: "status", sortable: true },
-    { display: "Options", key: "options" }
-]
 
 export const ReportFlickListHeadings = [
     { display: "#", key: "index" },
     { display: "User", key: "nameAndThumbnail", sortable: true },
-    { display: "Flick", key: "" },
+    { display: "Flick", key: "flick" },
     { display: "Message", key: "message", sortable: true },
     { display: "Status", key: "status", sortable: true },
     { display: "Options", key: "options" }
@@ -122,7 +125,7 @@ export const ReportFlickListHeadings = [
 export const ReportStoryListHeadings = [
     { display: "#", key: "index" },
     { display: "User", key: "username", sortable: true },
-    { display: "Story", key: "url" },
+    { display: "Story", key: "story" },
     { display: "Message", key: "message", sortable: true },
     { display: "Status", key: "status", sortable: true },
     { display: "Options", key: "options" }
@@ -132,7 +135,17 @@ export const ReportStoryListHeadings = [
 export const ReportQuestListHeadings = [
     { display: "#", key: "index" },
     { display: "User", key: "username", sortable: true },
-    { display: "Quest", key: "url" },
+    { display: "Quest", key: "quest" },
+    { display: "Message", key: "message", sortable: true },
+    { display: "Status", key: "status", sortable: true },
+    { display: "Options", key: "options" }
+]
+
+
+export const ReportUserListHeadings = [
+    { display: "#", key: "index" },
+    { display: "User", key: "nameAndIcon", sortable: true },
+    { display: "User Reported", key: "reportedTo" },
     { display: "Message", key: "message", sortable: true },
     { display: "Status", key: "status", sortable: true },
     { display: "Options", key: "options" }
@@ -142,10 +155,20 @@ export const ReportQuestListHeadings = [
 export const UserListHeadings = [
     { display: "#", key: "index" },
     { display: "Name", key: "name", sortable: true },
-    { display: "Username", key: "username"},
+    { display: "Username", key: "username" },
     { display: "Email", key: "email" },
-    {display  : "Warned Count" , key : "warnedCount" , sortable : true},
-    {display : "Balance" , key : "balance" , sortable : true},
+    { display: "Warned Count", key: "warnedCount", sortable: true },
+    { display: "Balance", key: "balance", sortable: true },
     { display: "Suspended", key: "suspended", sortable: true },
+    { display: "Options", key: "options" }
+]
+
+
+export const FeedbackListHeadings = [
+    { display: "#", key: "index" },
+    { display: "Message", key: "message" },
+    { display: "Rating", key: "rating", sortable: true },
+    { display: "Status", key: "status", sortable: true },
+    { display: "Created At", key: "createdAt", sortable: true },
     { display: "Options", key: "options" }
 ]

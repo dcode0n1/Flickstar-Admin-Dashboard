@@ -1,7 +1,7 @@
 "use client";
 
 import Card from "@/components/DataCard";
-import { dashboardCardData } from "@/constants/dashboard-card-routes";
+import { dashboardCardData, dashboardReportCardData } from "@/constants/dashboard-card-routes";
 
 export default function Dashboard(): JSX.Element {
   return (
@@ -16,10 +16,16 @@ export default function Dashboard(): JSX.Element {
           <span className="text-xs py-0.5 px-3 bg-green-100 rounded-sm">Thu, 14 Nov 2019 00:55:16 GMT</span>
         </div>
       </div>
-
-      {/* Cards Section */}
-      <div className="flex flex-wrap gap-4 flex-col sm:flex-row">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         {dashboardCardData.map((card, index) => (
+          <div className="flex-1 min-w-[280px] sm:min-w-[calc(50%-1rem)] lg:min-w-[calc(25%-1rem)] " key={index}>
+            <Card  {...card} />
+          </div>
+        ))}
+      </div>
+      <span className="text-2xl">Report <span className="text-red-500 font-semibold">Section</span></span>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 ">
+        {dashboardReportCardData.map((card, index) => (
           <div className="flex-1 min-w-[280px] sm:min-w-[calc(50%-1rem)] lg:min-w-[calc(25%-1rem)] " key={index}>
             <Card  {...card} />
           </div>

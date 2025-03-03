@@ -159,6 +159,8 @@ export default function MediaControlQuestList() {
                 <CardWrapper
                     name="Quest List"
                     viewBtn={false}
+                    btnText="Add New Quest"
+                    btnLink="create-quest"
                     className="p-2"
                 >
                     <div className="flex flex-wrap items-center m-2 gap-4 md:flex-2">
