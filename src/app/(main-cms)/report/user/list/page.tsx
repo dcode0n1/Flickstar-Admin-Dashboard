@@ -41,7 +41,7 @@ export default function ReportUserList() {
         }
         // Add query parameter based on selected tab
         params.append("skip", skip.toString());
-        return `${baseURL}/staff/get-all-staff?${params.toString()}`;
+        return `${baseURL}/user?${params.toString()}`;
     };
     ;
     const { data, error, isLoading, mutate } = useSWR<ApiResponse>(
@@ -111,7 +111,7 @@ export default function ReportUserList() {
     };
 
     // Filter staff data based on search term
-    const filteredStaff = data?.STAFF.filter(staff =>
+    const filteredStaff = data?.STAFF?.filter(staff =>
         staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         staff.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
         staff.email.toLowerCase().includes(searchTerm.toLowerCase())

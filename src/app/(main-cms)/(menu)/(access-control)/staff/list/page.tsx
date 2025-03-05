@@ -1,4 +1,5 @@
 "use client"
+
 import { useState, useEffect } from "react";
 import CardWrapper from "@/components/Card";
 import CustomBreakCrumb from "@/components/ui/custom-breadcrumbs";
@@ -10,13 +11,17 @@ import Link from "next/link";
 import useSWR from "swr";
 import { getFetcher } from "@/lib/fetcher";
 import { toast } from "sonner";
-import {  MoveDown, MoveUp, WifiOff } from "lucide-react";
+import { MoveDown, MoveUp, WifiOff } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import dynamic from "next/dynamic";
 import { usePermissionStore } from "@/store/permission-store";
 import { StaffListHeadings } from "@/constants/table-headings";
+
 const NotFound = dynamic(() => import("@/components/TableNoData/noDataFound"), { ssr: false });
+
+
 export default function StaffList() {
+    const { hasPermission, hasAnyPermission } = usePermissionStore();
     const [searchTerm, setSearchTerm] = useState("");
     const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
     const [skip, setSkip] = useState(0);
@@ -25,6 +30,7 @@ export default function StaffList() {
     const [sortBy, setSortBy] = useState<string>("");
     const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
     const [currentQuery, setCurrentQuery] = useState("");
+
     const buildApiUrl = () => {
         const params = new URLSearchParams();
         // Use currentQuery instead of searchTerm
@@ -37,8 +43,9 @@ export default function StaffList() {
         }
         // Add query parameter based on selected tab
         params.append("skip", skip.toString());
-        return `${baseURL}/staff/get-all-staff?${params.toString()}`;
+        return `${baseURL}/staff?${params.toString()}`;
     };
+
     const { data, error, isLoading, mutate } = useSWR<ApiResponse>(
         buildApiUrl(),
         getFetcher,
@@ -60,6 +67,9 @@ export default function StaffList() {
             errorRetryCount: 3
         }
     );
+
+
+
     useEffect(() => {
         const handleOnline = () => {
             setIsOnline(true);
@@ -79,6 +89,8 @@ export default function StaffList() {
             window.removeEventListener('offline', handleOffline);
         };
     }, [mutate]);
+
+
     const handleDeleteStaff = async (staffId: string) => {
         if (!isOnline) {
             toast.error("Cannot delete staff while offline");
@@ -92,7 +104,7 @@ export default function StaffList() {
                 } : currentData,
                 false
             );
-            const response = await fetch(`${baseURL}/staff/delete-staff/${staffId}`, {
+            const response = await fetch(`${baseURL}/staff/${staffId}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });
@@ -104,6 +116,7 @@ export default function StaffList() {
             mutate();
         }
     };
+
     const handleUpdateStatusStaff = async (staffId: string, currentStatus: boolean) => {
         if (!isOnline) {
             toast.error("Cannot update status while offline");
@@ -121,7 +134,7 @@ export default function StaffList() {
                 } : currentData,
                 false
             );
-            const response = await fetch(`${baseURL}/staff/change-status/${staffId}`, {
+            const response = await fetch(`${baseURL}/staff/${staffId}`, {
                 method: "PATCH",
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include'
@@ -135,11 +148,13 @@ export default function StaffList() {
         }
     };
     // Filter staff data based on search term
-    const filteredStaff = data?.STAFF.filter(staff =>
+    const filteredStaff = data?.STAFF?.filter(staff =>
         staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         staff.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
         staff.email.toLowerCase().includes(searchTerm.toLowerCase())
     );
+
+
     const handleSort = (key: string) => {
         if (sortBy === key) {
             setSortOrder(sortOrder === "asc" ? "desc" : "asc");
@@ -173,6 +188,7 @@ export default function StaffList() {
             setSkip(prevSkip);
         }
     };
+
     return (
         <div className="flex flex-1 flex-col bg-slate-100">
             <div className="align-center flex justify-between p-4 border-b shadow-md bg-white">
@@ -183,7 +199,7 @@ export default function StaffList() {
                 <CardWrapper
                     name="Staff List"
                     viewBtn={false}
-                    btnText= "Add New Staff"
+                    btnText={hasPermission("createAdmin") ? "Add New Staff" : undefined}
                     btnLink="/staff/create-staff"
                     className="p-2"
                 >
@@ -225,11 +241,11 @@ export default function StaffList() {
                                 <TableRow>
                                     {StaffListHeadings.map((heading, index) => {
                                         if (heading.display === "Options") {
-                                            // return hasAnyPermission(["deleteAdmin", "updateAdmin"]) ?(
+                                            return hasAnyPermission(["deleteAdmin", "updateAdmin"]) ? (
                                                 <TableHead key={index} className="text-xs font-semibold text-gray-600">
                                                     {heading.display}
                                                 </TableHead>
-                                            // ) : null;
+                                            ) : null;
                                         }
                                         return (
                                             <TableHead
@@ -334,7 +350,7 @@ export default function StaffList() {
                                                         className="peer sr-only"
                                                         type="checkbox"
                                                         checked={staff.status}
-                                                        // onChange={() => hasPermission("updateAdmin") && handleUpdateStatusStaff(staff._id, staff.status)}
+                                                        onChange={() => hasPermission("updateAdmin") && handleUpdateStatusStaff(staff._id, staff.status)}
                                                         disabled={!isOnline}
                                                     />
                                                     <span className="absolute inset-y-0 start-0 m-0.5 w-3 h-3 rounded-full bg-gray-300 ring-[4px] ring-inset ring-white transition-all peer-checked:translate-x-3 peer-checked:bg-white peer-checked:ring-transparent" />
@@ -343,31 +359,26 @@ export default function StaffList() {
                                             <TableCell className="text-sm font-normal">
                                                 ADMIN
                                             </TableCell>
-                                            {/* {hasAnyPermission(["updateAdmin", "deleteAdmin"]) && s */}
-                                            (
+                                            {hasAnyPermission(["updateAdmin", "deleteAdmin"]) && (
                                                 <TableCell className="text-sm">
                                                     <div className="flex space-x-2">
-                                                        {/* {hasPermission("updateAdmin") &&  */}
-                                                        <Link
+                                                        {hasPermission("updateAdmin") && <Link
                                                             href={`/staff/${staff._id}`}
                                                             className={`text-yellow-500 hover:text-yellow-600 ${!isOnline ? 'pointer-events-none opacity-50' : ''}`}
                                                         >
                                                             <RiPencilFill className="h-5 w-5" />
-                                                        </Link>
-                                                        {/* } */}
-                                                        {/* {hasPermission("deleteAdmin") && */}
-                                                         (
+                                                        </Link>}
+                                                        {hasPermission("deleteAdmin") && (
                                                             <button
                                                                 onClick={() => handleDeleteStaff(staff._id)}
                                                                 disabled={!isOnline}
                                                                 className={`text-red-500 hover:text-red-600 ${!isOnline ? 'opacity-50 cursor-not-allowed' : ''}`}
                                                             >
                                                                 <RiDeleteBinLine className="h-5 w-5" />
-                                                            </button>)
-                                                            {/* } */}
+                                                            </button>)}
                                                     </div>
                                                 </TableCell>
-                                            )
+                                            )}
                                         </TableRow>
                                     ))}
                                 </TableBody>
@@ -394,6 +405,7 @@ export default function StaffList() {
                     )}
                 </CardWrapper>
             </div>
+
             {!isOnline && (
                 <div className="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center space-x-2">
                     <WifiOff className="w-4 h-4" />

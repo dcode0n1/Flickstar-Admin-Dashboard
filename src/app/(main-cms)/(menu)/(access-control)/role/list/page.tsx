@@ -46,7 +46,7 @@ export default function RolesList() {
         }
         // Add query parameter based on selected tab
         params.append("skip", skip.toString());
-        return `${baseURL}/role/get-all-role?${params.toString()}`;
+        return `${baseURL}/role?${params.toString()}`;
     };
 
     const { data, error, isLoading, mutate } = useSWR<ApiResponse>(
@@ -142,9 +142,9 @@ export default function RolesList() {
                 false
             );
 
-            const response = await fetch(`${baseURL}/role/change-status/${roleId}`, {
+            const response = await fetch(`${baseURL}/role/${roleId}`, {
                 method: "PATCH",
-                headers: { 'Content-Type': 'application/json' },
+                
                 credentials: 'include'
             });
 
@@ -159,7 +159,7 @@ export default function RolesList() {
     };
 
     // Filter roles data based on search term
-    const filteredRoles = data?.ROLES.filter(role =>
+    const filteredRoles = data?.ROLES?.filter(role =>
         role.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 

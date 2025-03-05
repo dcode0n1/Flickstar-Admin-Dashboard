@@ -29,8 +29,8 @@ export default function DashboardLayout({
     const router = useRouter();
     const handleLogout = async () => {
         try {
-            const response = await fetch('http://localhost:4000/api/logout', {
-                method: 'POST',
+            const response = await fetch('http://localhost:4002/api/logout', {
+                method: 'DELETE',
                 headers: { 'Content-Type': 'application/json' },
                 credentials: 'include',
             }).then((res) => res.json());

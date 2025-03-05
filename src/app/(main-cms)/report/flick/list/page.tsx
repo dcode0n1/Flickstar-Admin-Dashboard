@@ -111,7 +111,7 @@ export default function ReportFlickList() {
   };
 
   // Filter staff data based on search term
-  const filteredStaff = data?.STAFF.filter(staff =>
+  const filteredStaff = data?.STAFF?.filter(staff =>
     staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     staff.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
     staff.email.toLowerCase().includes(searchTerm.toLowerCase())

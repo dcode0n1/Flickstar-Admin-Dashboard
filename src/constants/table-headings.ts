@@ -11,8 +11,8 @@ export const StaffListHeadings = [
     { display: "Username", key: "username", sortable: true },
     { display: "Email", key: "email", sortable: true },
     { display: "Status", key: "status", sortable: true },
-    { display: "Created By" },
-    { display: "Options" }
+    { display: "Created At", key: "createdAt", sortable: true },
+    { display: "Options", key: "options" }
 ]
 export const MediaControlFlickListHeadings = [
     { display: "#", key: "index" },
@@ -105,7 +105,7 @@ export const ReportCommentListHeadings = [
 
 export const ReportAudioListHeadings = [
     { display: "#", key: "index" },
-    { display: "User", key: "nameAndIcon", sortable: true },
+    { display: "User", key: "usernameAndURL", sortable: true },
     { display: "Audio", key: "audio" },
     { display: "Message", key: "message", sortable: true },
     { display: "Status", key: "status", sortable: true },
@@ -115,7 +115,7 @@ export const ReportAudioListHeadings = [
 
 export const ReportFlickListHeadings = [
     { display: "#", key: "index" },
-    { display: "User", key: "nameAndThumbnail", sortable: true },
+    { display: "User", key: "userNameAndURL", sortable: true },
     { display: "Flick", key: "flick" },
     { display: "Message", key: "message", sortable: true },
     { display: "Status", key: "status", sortable: true },
@@ -124,7 +124,7 @@ export const ReportFlickListHeadings = [
 
 export const ReportStoryListHeadings = [
     { display: "#", key: "index" },
-    { display: "User", key: "username", sortable: true },
+    { display: "User", key: "usernameAndURL", sortable: true },
     { display: "Story", key: "story" },
     { display: "Message", key: "message", sortable: true },
     { display: "Status", key: "status", sortable: true },
@@ -134,8 +134,8 @@ export const ReportStoryListHeadings = [
 
 export const ReportQuestListHeadings = [
     { display: "#", key: "index" },
-    { display: "User", key: "username", sortable: true },
-    { display: "Quest", key: "quest" },
+    { display: "User", key: "usernameAndURL", sortable: true },
+    { display: "Quest", key: "questId" },
     { display: "Message", key: "message", sortable: true },
     { display: "Status", key: "status", sortable: true },
     { display: "Options", key: "options" }
@@ -144,7 +144,7 @@ export const ReportQuestListHeadings = [
 
 export const ReportUserListHeadings = [
     { display: "#", key: "index" },
-    { display: "User", key: "nameAndIcon", sortable: true },
+    { display: "User", key: "usernameAndURL", sortable: true },
     { display: "User Reported", key: "reportedTo" },
     { display: "Message", key: "message", sortable: true },
     { display: "Status", key: "status", sortable: true },
@@ -154,7 +154,7 @@ export const ReportUserListHeadings = [
 
 export const UserListHeadings = [
     { display: "#", key: "index" },
-    { display: "Name", key: "name", sortable: true },
+    { display: "Name", key: "nameAndImage", sortable: true },
     { display: "Username", key: "username" },
     { display: "Email", key: "email" },
     { display: "Warned Count", key: "warnedCount", sortable: true },
@@ -171,4 +171,26 @@ export const FeedbackListHeadings = [
     { display: "Status", key: "status", sortable: true },
     { display: "Created At", key: "createdAt", sortable: true },
     { display: "Options", key: "options" }
+]
+
+
+
+
+// export const MediaControlFlickListHeadings = [
+//     { display: "#", key: "index" },
+//     { display: "Username", key: "username", sortable: true },
+//     { display: "Description", key: "description" },
+//     { display: "Repost Count", key: "repostCount", sortable: true },
+//     { display: "Comment Visible", key: "commentVisible", sortable: true },
+//     { display: "Phone Number", key: 'phoneNumber' },
+//     { display: "Suspended", key: 'suspended', sortable: true },
+//     { display: "Options", key: 'options' }
+// ]
+
+export const UserFlicksHeadings = [
+    { display: "#", key: "index" },
+    { display: "Flick", key: "flickIdAndThumbnai" },
+    { display: "Description", key: "description" },
+    { display: "Suspended", key: "suspended", sortable: true },
+    { display: "Created At", key: "createdAt", sortable: true },
 ]

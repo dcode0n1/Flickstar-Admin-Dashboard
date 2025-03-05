@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 
 // Zod schema for validation
 const loginSchema = z.object({
-    username: z.string().min(8, { message: "Username must be at least 8 characters long" }),
+    email: z.string().email(),
     password: z.string().min(3, { message: "Password must be at least 3 characters long" }),
 });
 
@@ -33,12 +33,13 @@ export default function AuthPage() {
 
     const onSubmit = async (data: LoginForm) => {
         try {
-            const response = await fetch('http://localhost:4000/api/login', {
+            const response = await fetch('http://localhost:4002/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(data),
+                body: JSON.stringify({fcmToken : "esehihai" , ...data}),
                 credentials: 'include',
             }).then((res) => res.json());
+            console.log("====> response", response)
             if (response.success) {
                 toast.success('Login successful');
                 router.push('/dashboard');
@@ -73,18 +74,18 @@ export default function AuthPage() {
                                         {/* Username Field */}
                                         <div className="mb-4">
                                             <label htmlFor="username" className="block text-gray-700">
-                                                Username <span className="text-red-500">*</span>
+                                                Email <span className="text-red-500">*</span>
                                             </label>
                                             <Input
                                                 type="text"
                                                 id="username"
-                                                className={`form-input mt-1 block w-full border-gray-300 ${errors.username ? 'border-red-500' : ''
+                                                className={`form-input mt-1 block w-full border-gray-300 ${errors.email ? 'border-red-500' : ''
                                                     }`}
                                                 placeholder="Enter username"
-                                                {...register('username')}
+                                                {...register('email')}
                                             />
-                                            {errors.username && (
-                                                <p className="text-red-500 text-sm">{errors.username.message}</p>
+                                            {errors.email && (
+                                                <p className="text-red-500 text-sm">{errors.email.message}</p>
                                             )}
                                         </div>
                                         {/* Password Field */}

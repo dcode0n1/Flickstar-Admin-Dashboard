@@ -31,7 +31,7 @@ export default function ForgetPassword() {
 
     const onSubmit = async (data: EmailForm) => {
         try {
-            const response = await axios.post(`http://localhost:4000/api/forget-password`, data, { withCredentials: true });
+            const response = await axios.post(`http://localhost:4002/api/forget-password`, data, { withCredentials: true });
             if (response.data.success) {
                 toast.success("Password reset link sent!");
                 localStorage.setItem('email', data.email); // Store email in localStorage
@@ -61,7 +61,7 @@ export default function ForgetPassword() {
                                                 className="w-20"
                                                 alt="CartUser Logo"
                                             />
-                                            <p className="text-gray-500 mt-2">Reset Password || OONZOO</p>
+                                            <p className="text-gray-500 mt-2">Reset Password || Flickstar</p>
                                         </div>
                                     </div>
                                     {/* Form */}

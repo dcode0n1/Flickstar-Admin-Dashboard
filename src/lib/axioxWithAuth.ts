@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 
-export const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:4000/api/admin';
+export const baseURL = process.env.REACT_APP_API_URL || 'http://localhost:4002/api/v1';
 export default async function axiosWithAuth(url: string, method: string = 'get', data: Record<string, unknown> | null = null): Promise<any> {
     try {
         const response = await axios({

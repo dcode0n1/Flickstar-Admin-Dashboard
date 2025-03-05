@@ -111,7 +111,7 @@ export default function MediaControlFlickList() {
   };
 
   // Filter staff data based on search term
-  const filteredStaff = data?.STAFF.filter(staff =>
+  const filteredStaff = data?.STAFF?.filter(staff =>
     staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     staff.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
     staff.email.toLowerCase().includes(searchTerm.toLowerCase())
@@ -169,15 +169,6 @@ export default function MediaControlFlickList() {
                 name="search"
                 className="w-full pl-10 py-1 text-sm text-gray-700 placeholder-gray-500 bg-transparent border-none focus:outline-none focus:ring-5 focus:ring-indigo-600"
                 placeholder="Search name, email, phone"
-              />
-            </div>
-            <div className="relative flex items-center w-full  sm:w-64 p-1 bg-white border rounded-sm">
-              <Clock3 className="absolute left-0 mx-2 w-4 text-gray-500" />
-              <input
-                type="text"
-                name="search"
-                className="w-full pl-10 py-1 text-sm text-gray-700 placeholder-gray-500 bg-transparent border-none focus:outline-none focus:ring-5 focus:ring-indigo-600"
-                placeholder="Search by date"
               />
             </div>
             <button className="bg-purple-700 px-10 py-1.5 ml-2 rounded-sm flex items-center transition duration-300 ease-in-out hover:bg-opacity-80">
@@ -248,7 +239,7 @@ export default function MediaControlFlickList() {
                     <TableCell colSpan={MediaControlFlickListHeadings.length} className="text-center py-6">
                       <div className="flex flex-col items-center justify-center gap-2">
                         <WifiOff className="w-8 h-8 text-red-500" />
-                        <p className="text-gray-500">Unable to load staff data</p>
+                        <p className="text-gray-500">Unable to load Flick data</p>
                         <button
                           onClick={() => mutate()}
                           className="text-purple-600 hover:text-purple-800 underline"
@@ -264,7 +255,7 @@ export default function MediaControlFlickList() {
                   <TableRow>
                     <TableCell colSpan={MediaControlFlickListHeadings.length} className="text-center py-6">
                       <NotFound />
-                      <p className="text-gray-500 mt-2">No staff members found</p>
+                      <p className="text-gray-500 mt-2">No flick found</p>
                     </TableCell>
                   </TableRow>
                 </TableBody>

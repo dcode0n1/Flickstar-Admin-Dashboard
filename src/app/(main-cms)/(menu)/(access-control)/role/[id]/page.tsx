@@ -16,9 +16,10 @@ export default function UpdateRole() {
     const params = useParams();
     const router = useRouter()
     const { data: roleData, error, mutate } = useSWR(
-        `${baseURL}/role/get-role/${params.id}`,
+        `${baseURL}/role/${params.id}`,
         getFetcher
     );
+    console.log(roleData)
     const handleInputChange = (field: string, value: string) => {
         // Optimistically update the local cache using mutate
         mutate(
@@ -36,7 +37,7 @@ export default function UpdateRole() {
         mutate(
             (currentData: any) => {
                 if (!currentData) return currentData;
-                const updatedPermissions = currentData.permissions.includes(permission)
+                const updatedPermissions = currentData.permissions?.includes(permission)
                     ? currentData.permissions.filter((p: string) => p !== permission)
                     : [...currentData.permissions, permission];
 
@@ -59,7 +60,7 @@ export default function UpdateRole() {
             };
             // Make a single API call to update the role
             await axios.put(
-                `${baseURL}/role/update-role/${params.id}`,
+                `${baseURL}/role/${params.id}`,
                 updatedRole,
                 { withCredentials: true }
             );

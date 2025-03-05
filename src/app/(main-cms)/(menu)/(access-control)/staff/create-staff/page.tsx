@@ -17,11 +17,11 @@ import { useRouter } from "next/navigation";
 const staffSchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
     username: z.string().min(8, { message: "Username must be at least 8 characters long" }),
-    phoneNumber: z.string().optional().nullable(),
+    phone: z.string().optional().nullable(),
     email: z.string().email({ message: "Invalid email format" }),
     password: z.string().min(5, { message: "Password must be at least 5 characters long" }),
     confirmPassword: z.string().min(5, { message: "Confirm Password is required" }),
-    roleId: z.string().min(1, { message: "Role is required" }),
+    role: z.string().min(1, { message: "Role is required" }),
     address: z.string().optional().nullable(),
     profileImage: z.any().optional(),
 }).refine((data) => {
@@ -45,10 +45,12 @@ export default function CreateStaff() {
 
     // Fetch roles for dropdown
     const { data: rolesData, error: rolesError } = useSWR<{ DROPROLES: Role[] }>(
-        `${baseURL}/role/get-dropdown`,
+        `${baseURL}/role-dropdown`,
         getFetcher
     );
-    
+
+    console.log("====> I am the roleData", rolesData)
+
 
     const {
         register,
@@ -84,32 +86,14 @@ export default function CreateStaff() {
         if (isSubmitting) return;
         try {
             setIsSubmitting(true);
-            const formSubmissionData = new FormData();
-            // Append all form fields except confirmPassword
-            Object.entries(formData).forEach(([key, value]) => {
-                if (
-                    value !== null &&
-                    value !== undefined &&
-                    key !== 'profileImage' &&
-                    key !== 'confirmPassword'
-                ) {
-                    formSubmissionData.append(key, value.toString());
-                }
-            });
-            if (selectedFile) {
-                formSubmissionData.append('profileImage', selectedFile);
-            }
+            const { confirmPassword, ...rest } = formData
             const response = await axios.post(
-                `${baseURL}/staff/create-staff`,
-                formSubmissionData,
+                `${baseURL}/staff`,
+                rest,
                 {
                     withCredentials: true,
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
                 }
             );
-
             if (response.data.success) {
                 toast.success('Staff created successfully');
                 router.push('list');
@@ -178,10 +162,10 @@ export default function CreateStaff() {
                                 id="phoneNumber"
                                 type="tel"
                                 placeholder="0XXXXXXX"
-                                {...register("phoneNumber")}
-                                className={errors.phoneNumber ? "border-red-500" : ""}
+                                {...register("phone")}
+                                className={errors.phone ? "border-red-500" : ""}
                             />
-                            {errors.phoneNumber && <p className="text-red-500 text-sm">{errors.phoneNumber.message}</p>}
+                            {errors.phone && <p className="text-red-500 text-sm">{errors.phone.message}</p>}
                         </div>
 
                         {/* Email Input */}
@@ -244,9 +228,9 @@ export default function CreateStaff() {
                                         text: role.name,
                                     })) || []
                                 }
-                                {...register("roleId")}
+                                {...register("role")}
                             />
-                            {errors.roleId && <p className="text-red-500 text-sm">{errors.roleId.message}</p>}
+                            {errors.role && <p className="text-red-500 text-sm">{errors.role.message}</p>}
                         </div>
 
                         {/* Address Input */}

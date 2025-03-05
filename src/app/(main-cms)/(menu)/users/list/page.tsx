@@ -10,11 +10,11 @@ import Link from "next/link";
 import useSWR from "swr";
 import { getFetcher } from "@/lib/fetcher";
 import { toast } from "sonner";
-import { Clock3, MoveDown, MoveUp,  WifiOff } from "lucide-react";
+import { Clock3, MoveDown, MoveUp, UserRoundPen, WifiOff } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import dynamic from "next/dynamic";
 import { usePermissionStore } from "@/store/permission-store";
-import {  UserListHeadings } from "@/constants/table-headings";
+import { UserListHeadings } from "@/constants/table-headings";
 import { RiSearchLine } from "@/components/icons/RiSearchLine";
 import { RiEqualizerFill } from "@/components/icons/RiEqualizerFill";
 import { RiRefreshLine } from "@/components/icons/RiRefreshLine_short";
@@ -41,9 +41,9 @@ export default function UsersList() {
     }
     // Add query parameter based on selected tab
     params.append("skip", skip.toString());
-    return `${baseURL}/staff/get-all-staff?${params.toString()}`;
+    return `${baseURL}/user?${params.toString()}`;
   };
-  ;
+
   const { data, error, isLoading, mutate } = useSWR<ApiResponse>(
     buildApiUrl(),
     getFetcher,
@@ -65,6 +65,8 @@ export default function UsersList() {
       errorRetryCount: 3
     }
   );
+
+  console.log("====>  user", data)
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
@@ -84,37 +86,12 @@ export default function UsersList() {
       window.removeEventListener('offline', handleOffline);
     };
   }, [mutate]);
-  const handleDeleteStaff = async (staffId: string) => {
-    if (!isOnline) {
-      toast.error("Cannot delete staff while offline");
-      return;
-    }
-    try {
-      mutate(
-        (currentData: ApiResponse | undefined) => currentData ? {
-          ...currentData,
-          STAFF: currentData.STAFF.filter(staff => staff._id !== staffId)
-        } : currentData,
-        false
-      );
-      const response = await fetch(`${baseURL}/staff/delete-staff/${staffId}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to delete staff');
-      toast.success("Staff member deleted successfully");
-      mutate();
-    } catch (error) {
-      toast.error("Failed to delete staff member");
-      mutate();
-    }
-  };
 
   // Filter staff data based on search term
-  const filteredStaff = data?.STAFF.filter(staff =>
-    staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    staff.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    staff.email.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredUser = data?.USERS?.filter(user =>
+    user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    user.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
   const handleSort = (key: string) => {
     if (sortBy === key) {
@@ -170,19 +147,16 @@ export default function UsersList() {
                 className="w-full pl-10 py-1 text-sm text-gray-700 placeholder-gray-500 bg-transparent border-none focus:outline-none focus:ring-5 focus:ring-indigo-600"
                 placeholder="Search name, email, phone"
                 onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-            <div className="relative flex items-center w-full  sm:w-64 p-1 bg-white border rounded-sm">
-              <Clock3 className="absolute left-0 mx-2 w-4 text-gray-500" />
-              <input
-                type="text"
-                name="search"
-                className="w-full pl-10 py-1 text-sm text-gray-700 placeholder-gray-500 bg-transparent border-none focus:outline-none focus:ring-5 focus:ring-indigo-600"
-                placeholder="Search by date"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSearch();
+                  }
+                }}
               />
             </div>
             <button className="bg-purple-700 px-10 py-1.5 ml-2 rounded-sm flex items-center transition duration-300 ease-in-out hover:bg-opacity-80">
-              <RiEqualizerFill /><span className="ml-1 text-white">Search</span>
+              <RiEqualizerFill /><span className="ml-1 text-white"
+              >Search</span>
             </button>
             <button className="bg-red-400 px-10 py-1.5 ml-2 rounded-sm flex items-center transition duration-300 ease-in-out hover:bg-opacity-80">
               <RiRefreshLine /><span className="ml-1 text-white"> Reset</span>
@@ -246,10 +220,10 @@ export default function UsersList() {
               ) : error || !isOnline ? (
                 <TableBody>
                   <TableRow>
-                      <TableCell colSpan={UserListHeadings.length} className="text-center py-6">
+                    <TableCell colSpan={UserListHeadings.length} className="text-center py-6">
                       <div className="flex flex-col items-center justify-center gap-2">
                         <WifiOff className="w-8 h-8 text-red-500" />
-                        <p className="text-gray-500">Unable to load staff data</p>
+                        <p className="text-gray-500">Unable to load user data</p>
                         <button
                           onClick={() => mutate()}
                           className="text-purple-600 hover:text-purple-800 underline"
@@ -260,83 +234,64 @@ export default function UsersList() {
                     </TableCell>
                   </TableRow>
                 </TableBody>
-              ) : !filteredStaff?.length ? (
+              ) : !filteredUser?.length ? (
                 <TableBody>
                   <TableRow>
-                        <TableCell colSpan={UserListHeadings.length} className="text-center py-6">
+                    <TableCell colSpan={UserListHeadings.length} className="text-center py-6">
                       <NotFound />
-                      <p className="text-gray-500 mt-2">No staff members found</p>
+                      <p className="text-gray-500 mt-2">No user members found</p>
                     </TableCell>
                   </TableRow>
                 </TableBody>
               ) : (
                 <TableBody>
-                  {filteredStaff.map((staff, index) => (
-                    <TableRow key={staff._id} className="hover:bg-gray-50">
+                  {filteredUser.map((user, index) => (
+                    <TableRow key={user._id} className="hover:bg-gray-50">
                       <TableCell className="text-sm font-normal">
                         {index + 1}
                       </TableCell>
                       <TableCell className="text-sm">
                         <div className="flex items-center">
                           <img
-                            src={staff.profileImage}
-                            alt={staff.name}
+                            src={user.photo}
+                            alt={user.name}
                             width={40}
                             height={40}
                             className="border-double border border-gray-400 p-0.5 mr-2"
                           />
                           <div>
-                            <p className="font-normal">{staff.name}</p>
-                            <p className="text-xs text-gray-500">{staff.role}</p>
+                            <p className="font-normal">{user.name}</p>
                           </div>
                         </div>
                       </TableCell>
                       <TableCell className="text-sm font-normal">
-                        {staff.username}
+                        {user.username}
                       </TableCell>
                       <TableCell className="text-sm font-normal">
-                        {staff.email}
+                        {user.email}
                       </TableCell>
-                      <TableCell className="text-sm">
-                        <label className="relative inline-block h-4 w-7 cursor-pointer rounded-full bg-gray-300 transition [-webkit-tap-highlight-color:_transparent] has-[:checked]:bg-purple-800">
-                          <input
-                            className="peer sr-only"
-                            type="checkbox"
-                            checked={staff.status}
-                            // onChange={() => hasPermission("updateAdmin") && handleUpdateStatusStaff(staff._id, staff.status)}
-                            disabled={!isOnline}
-                          />
-                          <span className="absolute inset-y-0 start-0 m-0.5 w-3 h-3 rounded-full bg-gray-300 ring-[4px] ring-inset ring-white transition-all peer-checked:translate-x-3 peer-checked:bg-white peer-checked:ring-transparent" />
-                        </label>
+                      <TableCell>
+                        {user.warnedCount}
                       </TableCell>
                       <TableCell className="text-sm font-normal">
-                        ADMIN
+                        {user.balance}
+                      </TableCell>
+                      <TableCell >
+                        <span className={`text-white text-xs rounded-sm px-3 py-0.5 ${user.suspended ? 'bg-green-400' : 'bg-red-500'}`} > {user.suspended.toString()}</span>
                       </TableCell>
                       {/* {hasAnyPermission(["updateAdmin", "deleteAdmin"]) && s */}
-                      (
                       <TableCell className="text-sm">
                         <div className="flex space-x-2">
                           {/* {hasPermission("updateAdmin") &&  */}
                           <Link
-                            href={`/staff/${staff._id}`}
+                            href={`/users/${user._id}`}
+                            title="View"
                             className={`text-yellow-500 hover:text-yellow-600 ${!isOnline ? 'pointer-events-none opacity-50' : ''}`}
                           >
-                            <RiPencilFill className="h-5 w-5" />
+                            <UserRoundPen className="h-5 w-5" />
                           </Link>
-                          {/* } */}
-                          {/* {hasPermission("deleteAdmin") && */}
-                          (
-                          <button
-                            onClick={() => handleDeleteStaff(staff._id)}
-                            disabled={!isOnline}
-                            className={`text-red-500 hover:text-red-600 ${!isOnline ? 'opacity-50 cursor-not-allowed' : ''}`}
-                          >
-                            <RiDeleteBinLine className="h-5 w-5" />
-                          </button>)
-                          {/* } */}
                         </div>
                       </TableCell>
-                      )
                     </TableRow>
                   ))}
                 </TableBody>

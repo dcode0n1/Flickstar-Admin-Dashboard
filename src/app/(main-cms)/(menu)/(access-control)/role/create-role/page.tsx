@@ -38,7 +38,7 @@ export default function CreateRole() {
     };
     const handleSubmit = async () => {
         try {
-            const createUser = await axios.post(`${baseURL}/role/create-role`, role, { withCredentials: true });
+            const createUser = await axios.post(`${baseURL}/role`, role, { withCredentials: true });
             if (createUser.data.success) {
                 toast.success("Role created successfully");
                 router.push('list')

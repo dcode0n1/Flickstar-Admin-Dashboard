@@ -22,7 +22,7 @@ export default function PermissionCategory({ category, permissions, selectedPerm
                                 <input
                                     type="checkbox"
                                     className="peer sr-only"
-                                    checked={selectedPermissions.includes(permission.value)}
+                                    checked={selectedPermissions?.includes(permission.value)}
                                     onChange={() => onToggle(permission.value)}
                                 />
                                 <span className="absolute inset-y-0 start-0 m-0.5 w-3 h-3 rounded-full bg-gray-300 ring-[4px] ring-inset ring-white transition-all peer-checked:translate-x-3 peer-checked:bg-white peer-checked:ring-transparent" />
