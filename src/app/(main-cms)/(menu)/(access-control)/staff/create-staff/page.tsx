@@ -1,5 +1,5 @@
 'use client';
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -12,6 +12,8 @@ import CusInput from "@/components/CustomInput";
 import { baseURL } from "@/lib/axioxWithAuth";
 import { getFetcher } from "@/lib/fetcher";
 import { useRouter } from "next/navigation";
+import { watch } from "fs";
+import { handleUploadToPresignedUrl } from "@/utils/utils";
 
 // Zod schema for create staff - making password required
 const staffSchema = z.object({
@@ -23,7 +25,9 @@ const staffSchema = z.object({
     confirmPassword: z.string().min(5, { message: "Confirm Password is required" }),
     role: z.string().min(1, { message: "Role is required" }),
     address: z.string().optional().nullable(),
-    profileImage: z.any().optional(),
+    image: z.instanceof(FileList)
+        .refine(files => files.length > 0, "Profile image is required")
+        .refine(files => files[0]?.type.startsWith("image/"), "Invalid image format"),
 }).refine((data) => {
     return data.password === data.confirmPassword;
 }, {
@@ -41,55 +45,60 @@ interface Role {
 export default function CreateStaff() {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [profileSrc, setProfileSrc] = useState<string | null>(null); // New state for icon preview
 
     // Fetch roles for dropdown
     const { data: rolesData, error: rolesError } = useSWR<{ DROPROLES: Role[] }>(
         `${baseURL}/role-dropdown`,
         getFetcher
     );
-
-    console.log("====> I am the roleData", rolesData)
-
-
     const {
         register,
         handleSubmit,
         formState: { errors },
-        setValue,
+        watch,
     } = useForm<StaffData>({
         resolver: zodResolver(staffSchema),
     });
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
-            const maxSize = 5 * 1024 * 1024; // 5MB
+    const profileImageList = watch("image") as FileList;
 
-            if (!validTypes.includes(file.type)) {
-                toast.error('Please upload a valid image file (JPEG, PNG, or GIF)');
-                return;
-            }
+    useEffect(() => {
+        if (profileImageList?.length > 0) {
+            const file = profileImageList[0];
+            const url = URL.createObjectURL(file);
+            setProfileSrc(url);
 
-            if (file.size > maxSize) {
-                toast.error('File size should be less than 5MB');
-                return;
-            }
-
-            setSelectedFile(file);
-            setValue('profileImage', file);
+            // Cleanup object URL
+            return () => URL.revokeObjectURL(url);
+        } else {
+            setProfileSrc(null);
         }
-    };
+    }, [profileImageList])
 
     const onSubmit: SubmitHandler<StaffData> = async (formData) => {
         if (isSubmitting) return;
+        setIsSubmitting(true);
         try {
-            setIsSubmitting(true);
-            const { confirmPassword, ...rest } = formData
+            const presignedResponse = await axios.post(`${baseURL}/staff/presigned-url`, {
+                fileType: formData.image[0].type,
+            }, {
+                withCredentials: true
+            }
+            );
+            const { profileImagePresignedUrl, staffId } = presignedResponse.data;
+
+            await handleUploadToPresignedUrl(formData.image[0], profileImagePresignedUrl);
+
+            const { confirmPassword, image , ...rest } = formData
+            const R2_PUBLIC_URL = 'https://pub-301c1efdf41d428f9ab043c4d4ecbac9.r2.dev'
             const response = await axios.post(
                 `${baseURL}/staff`,
-                rest,
+                {
+                    _id: staffId,
+                    image: `${R2_PUBLIC_URL}/staff/${staffId}/profile-image`,
+                    ...rest
+                },
                 {
                     withCredentials: true,
                 }
@@ -254,15 +263,19 @@ export default function CreateStaff() {
                                 Profile Image
                             </label>
                             <Input
-                                id="profileImage"
+                                id="iconFile"
                                 type="file"
                                 accept="image/*"
-                                onChange={handleFileChange}
+                                {...register("image")}
+                                className={errors.image ? "border-red-500" : ""}
                             />
-                            {selectedFile && (
-                                <p className="text-sm text-gray-500 mt-2">
-                                    Selected file: {selectedFile.name}
-                                </p>
+                            {errors.image && <p className="text-red-500 text-sm">{errors.image.message}</p>}
+                            {profileSrc && (
+                                <img
+                                    src={profileSrc}
+                                    alt="Profile preview"
+                                    className="mt-2 h-40 w-40 rounded-md shadow-sm"
+                                />
                             )}
                         </div>
 

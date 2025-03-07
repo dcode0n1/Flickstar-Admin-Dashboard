@@ -39,9 +39,9 @@ export default function MediaControlStoryList() {
             params.append('sort', sortBy);
             params.append('order', sortOrder);
         }
-        // Add query parameter based on selected tab
+    // Add query parameter based on selected tab
         params.append("skip", skip.toString());
-        return `${baseURL}/staff/get-all-staff?${params.toString()}`;
+        return `${baseURL}/media-control/story?${params.toString()}`;
     };
     ;
     const { data, error, isLoading, mutate } = useSWR<ApiResponse>(
@@ -279,7 +279,7 @@ export default function MediaControlStoryList() {
                                             <TableCell className="text-sm">
                                                 <div className="flex items-center">
                                                     <img
-                                                        src={staff.profileImage}
+                                                        src={staff.image}
                                                         alt={staff.name}
                                                         width={40}
                                                         height={40}

@@ -1,6 +1,4 @@
 
-
-
 interface Staff {
     _id: string;
     name: string;
@@ -8,7 +6,7 @@ interface Staff {
     email: string;
     role: string;
     status: boolean;
-    profileImage: string;
+    image: string;
 }
 
 interface ApiResponse {

@@ -16,6 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import dynamic from "next/dynamic";
 import { usePermissionStore } from "@/store/permission-store";
 import { StaffListHeadings } from "@/constants/table-headings";
+import { Input } from "@/components/ui/input";
 
 const NotFound = dynamic(() => import("@/components/TableNoData/noDataFound"), { ssr: false });
 
@@ -203,23 +204,10 @@ export default function StaffList() {
                     btnLink="/staff/create-staff"
                     className="p-2"
                 >
-                    <div className="flex justify-between items-center m-4">
-                        {/* <div>
-                            <label className="text-sm">
-                                Show
-                                <select className="mx-2 p-1 border rounded">
-                                    <option>10</option>
-                                    <option>25</option>
-                                    <option>50</option>
-                                    <option>100</option>
-                                </select>
-                                Entries
-                            </label>
-                        </div> */}
-                        <div>
-                            <label className="text-sm">
-                                Search:
-                                <input
+                    <div className="flex md:justify-end items-center py-3">
+                            <div className="text-sm flex items-center space-x-2">
+                                <span>Search:</span>
+                                <Input
                                     type="text"
                                     value={searchTerm}
                                     onChange={(e) => setSearchTerm(e.target.value)}
@@ -228,11 +216,9 @@ export default function StaffList() {
                                             handleSearch();
                                         }
                                     }}
-                                    className="ml-2 p-1 border rounded"
                                     placeholder="Search by name, username, or email..."
-                                    disabled={!isOnline}
+                                    disabled={!isOnline || isLoading}
                                 />
-                            </label>
                         </div>
                     </div>
                     <div className="overflow-x-auto grid grid-cols-1">
@@ -326,7 +312,7 @@ export default function StaffList() {
                                             <TableCell className="text-sm">
                                                 <div className="flex items-center">
                                                     <img
-                                                        src={staff.profileImage}
+                                                        src={staff.image}
                                                         alt={staff.name}
                                                         width={40}
                                                         height={40}

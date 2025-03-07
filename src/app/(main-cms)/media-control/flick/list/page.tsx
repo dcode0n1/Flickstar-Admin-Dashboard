@@ -41,7 +41,7 @@ export default function MediaControlFlickList() {
     }
     // Add query parameter based on selected tab
     params.append("skip", skip.toString());
-    return `${baseURL}/staff/get-all-staff?${params.toString()}`;
+    return `${baseURL}/media-control/flick?${params.toString()}`;
   };
   ;
   const { data, error, isLoading, mutate } = useSWR<ApiResponse>(
@@ -84,38 +84,12 @@ export default function MediaControlFlickList() {
       window.removeEventListener('offline', handleOffline);
     };
   }, [mutate]);
-  const handleDeleteStaff = async (staffId: string) => {
-    if (!isOnline) {
-      toast.error("Cannot delete staff while offline");
-      return;
-    }
-    try {
-      mutate(
-        (currentData: ApiResponse | undefined) => currentData ? {
-          ...currentData,
-          STAFF: currentData.STAFF.filter(staff => staff._id !== staffId)
-        } : currentData,
-        false
-      );
-      const response = await fetch(`${baseURL}/staff/delete-staff/${staffId}`, {
-        method: 'DELETE',
-        credentials: 'include'
-      });
-      if (!response.ok) throw new Error('Failed to delete staff');
-      toast.success("Staff member deleted successfully");
-      mutate();
-    } catch (error) {
-      toast.error("Failed to delete staff member");
-      mutate();
-    }
-  };
 
   // Filter staff data based on search term
-  const filteredStaff = data?.STAFF?.filter(staff =>
-    staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    staff.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    staff.email.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredFlicks = data?.FLICKS?.filter(flick =>
+    flick.user.username.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
   const handleSort = (key: string) => {
     if (sortBy === key) {
       setSortOrder(sortOrder === "asc" ? "desc" : "asc");
@@ -250,7 +224,7 @@ export default function MediaControlFlickList() {
                     </TableCell>
                   </TableRow>
                 </TableBody>
-              ) : !filteredStaff?.length ? (
+              ) : !filteredFlicks?.length ? (
                 <TableBody>
                   <TableRow>
                     <TableCell colSpan={MediaControlFlickListHeadings.length} className="text-center py-6">
@@ -261,72 +235,43 @@ export default function MediaControlFlickList() {
                 </TableBody>
               ) : (
                 <TableBody>
-                  {filteredStaff.map((staff, index) => (
-                    <TableRow key={staff._id} className="hover:bg-gray-50">
+                  {filteredFlicks.map((flick, index) => (
+                    <TableRow key={flick._id} className="hover:bg-gray-50">
                       <TableCell className="text-sm font-normal">
                         {index + 1}
                       </TableCell>
                       <TableCell className="text-sm">
                         <div className="flex items-center">
                           <img
-                            src={staff.profileImage}
-                            alt={staff.name}
+                            src={flick.user.photo}
+                            alt={flick.user.username}
                             width={40}
                             height={40}
                             className="border-double border border-gray-400 p-0.5 mr-2"
                           />
-                          <div>
-                            <p className="font-normal">{staff.name}</p>
-                            <p className="text-xs text-gray-500">{staff.role}</p>
-                          </div>
+                          <span className="font-normal">{flick.user.username}</span>
                         </div>
                       </TableCell>
                       <TableCell className="text-sm font-normal">
-                        {staff.username}
+                        {flick.description}
                       </TableCell>
                       <TableCell className="text-sm font-normal">
-                        {staff.email}
+                        {flick.repostCount}
                       </TableCell>
                       <TableCell className="text-sm">
-                        <label className="relative inline-block h-4 w-7 cursor-pointer rounded-full bg-gray-300 transition [-webkit-tap-highlight-color:_transparent] has-[:checked]:bg-purple-800">
-                          <input
-                            className="peer sr-only"
-                            type="checkbox"
-                            checked={staff.status}
-                            // onChange={() => hasPermission("updateAdmin") && handleUpdateStatusStaff(staff._id, staff.status)}
-                            disabled={!isOnline}
-                          />
-                          <span className="absolute inset-y-0 start-0 m-0.5 w-3 h-3 rounded-full bg-gray-300 ring-[4px] ring-inset ring-white transition-all peer-checked:translate-x-3 peer-checked:bg-white peer-checked:ring-transparent" />
-                        </label>
+                        {flick.suspended}
                       </TableCell>
                       <TableCell className="text-sm font-normal">
-                        ADMIN
+                        {flick.createdAt}
                       </TableCell>
-                      {/* {hasAnyPermission(["updateAdmin", "deleteAdmin"]) && s */}
-                      (
                       <TableCell className="text-sm">
-                        <div className="flex space-x-2">
-                          {/* {hasPermission("updateAdmin") &&  */}
-                          <Link
-                            href={`/staff/${staff._id}`}
-                            className={`text-yellow-500 hover:text-yellow-600 ${!isOnline ? 'pointer-events-none opacity-50' : ''}`}
-                          >
-                            <RiPencilFill className="h-5 w-5" />
-                          </Link>
-                          {/* } */}
-                          {/* {hasPermission("deleteAdmin") && */}
-                          (
-                          <button
-                            onClick={() => handleDeleteStaff(staff._id)}
-                            disabled={!isOnline}
-                            className={`text-red-500 hover:text-red-600 ${!isOnline ? 'opacity-50 cursor-not-allowed' : ''}`}
-                          >
-                            <RiDeleteBinLine className="h-5 w-5" />
-                          </button>)
-                          {/* } */}
-                        </div>
+                        <Link
+                          href={`/media-control/flick/${flick._id}`}
+                          className={`text-yellow-500 hover:text-yellow-600 ${!isOnline ? 'pointer-events-none opacity-50' : ''}`}
+                        >
+                          <RiPencilFill className="h-5 w-5" />
+                        </Link>
                       </TableCell>
-                      )
                     </TableRow>
                   ))}
                 </TableBody>

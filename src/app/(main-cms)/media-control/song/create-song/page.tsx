@@ -1,5 +1,5 @@
 'use client';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -10,61 +10,108 @@ import { Input } from "@/components/ui/input";
 import { baseURL } from "@/lib/axioxWithAuth";
 import { useRouter } from "next/navigation";
 import CustomBreadCrumb from "@/components/ui/custom-breadcrumbs";
-import {  MediaControlCreateSongsBreadCrumbs } from "@/constants/bread-crumbs";
-// Zod schema for create staff - making password required
+import { MediaControlCreateSongsBreadCrumbs } from "@/constants/bread-crumbs";
+import { handleUploadToPresignedUrl } from "@/utils/utils";
+
+// Zod schema for song metadata
 const SongSchema = z.object({
     name: z.string().min(4, "Name is required"),
-    url: z.instanceof(File),
-    icon: z.instanceof(File),
-    duration: z.coerce.number()
-})
+    audioFile: z.instanceof(FileList)
+        .refine(files => files.length > 0, "Audio file is required")
+        .refine(files => files[0]?.type.startsWith("audio/"), "Invalid audio format"),
+    iconFile: z.instanceof(FileList)
+        .refine(files => files.length > 0, "Icon is required")
+        .refine(files => files[0]?.type.startsWith("image/"), "Invalid image format"),
+    duration: z.number().positive("Duration must be greater than 0"),
+});
+
 type SongData = z.infer<typeof SongSchema>;
+
 export default function CreateSong() {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-        setValue,
-    } = useForm<SongData>({
+    const [audioSrc, setAudioSrc] = useState<string | null>(null);
+    const [iconSrc, setIconSrc] = useState<string | null>(null); // New state for icon preview
+
+    const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<SongData>({
         resolver: zodResolver(SongSchema),
     });
-    const onSubmit: SubmitHandler<SongData> = async (formData) => {
-        if (isSubmitting) return;
-        try {
-            setIsSubmitting(true);
-            const response = await axios.post(
-                `${baseURL}/staff/create-staff`,
-                formData,
-                {
-                    withCredentials: true,
-                    headers: {
-                        'Content-Type': 'multipart/form-data',
-                    },
+
+    const audioFileList = watch("audioFile");
+    const iconFileList = watch("iconFile")
+
+    // Handle audio file preview and duration calculation
+    useEffect(() => {
+        if (audioFileList?.length > 0) {
+            const audioFile = audioFileList[0];
+            const url = URL.createObjectURL(audioFile);
+            setAudioSrc(url);
+            const audio = new Audio(url);
+            audio.onloadedmetadata = () => {
+                if (!isNaN(audio.duration)) {
+                    setValue("duration", Math.floor(audio.duration));
                 }
-            );
-            if (response.data.success) {
-                toast.success('Staff created successfully');
-                router.push('list');
+            };
+            audio.onerror = () => {
+                toast.error("Invalid audio file. Please try another one.");
+            };
+            if (iconFileList?.length > 0) {
+                const file = iconFileList[0];
+                const url = URL.createObjectURL(file);
+                setIconSrc(url);
+
+                // Cleanup object URL
+                return () => URL.revokeObjectURL(url);
             } else {
-                throw new Error(response.data.message || 'Failed to create staff');
+                setIconSrc(null);
             }
-        } catch (error: any) {
-            console.error('Staff creation error:', error);
-            toast.error(
-                error.response?.data?.message ||
-                error.message ||
-                'An error occurred while creating staff'
+        }
+    }, [audioFileList, iconFileList, setValue]);
+    const onSubmit: SubmitHandler<SongData> = async (data) => {
+        if (isSubmitting) return;
+        setIsSubmitting(true);
+        try {
+            const presignedResponse = await axios.post(`${baseURL}/media-control/song/presigned-url`, {
+                fileName: data.audioFile[0].name,
+                fileType : data.audioFile[0].type,
+                iconType: data.iconFile[0].type,
+                iconName: data.iconFile[0].name,
+            }, {
+                withCredentials: true
+            }
             );
+            console.log(presignedResponse)
+
+            const { audioPresignedUrl, iconPresignedUrl, songId } = presignedResponse.data;
+
+            // 2. Upload files to presigned URLs
+            await Promise.all([
+                handleUploadToPresignedUrl(data.audioFile[0], audioPresignedUrl),
+                handleUploadToPresignedUrl(data.iconFile[0], iconPresignedUrl),
+            ]);
+            const R2_PUBLIC_URL = 'https://pub-301c1efdf41d428f9ab043c4d4ecbac9.r2.dev'
+            await axios.post(`${baseURL}/media-control/song`, {
+                _id: songId,
+                name: data.name,
+                url: `${R2_PUBLIC_URL}/song/${songId}/${data.audioFile[0].name}` ,
+                icon: `${R2_PUBLIC_URL}/song/${songId}/${data.iconFile[0].name}` ,
+                duration: data.duration,
+            },
+                { withCredentials: true }
+            );
+
+            toast.success('Song created successfully');
+            router.push('list');
+        } catch (error: any) {
+            console.error('Song creation error:', error);
+            toast.error(error.response?.data?.message || 'Failed to create song');
         } finally {
             setIsSubmitting(false);
         }
     };
-    // if (rolesError) return <div className="p-4 text-red-500">Error loading roles. Please try again later.</div>;
-    // if (!rolesData) return <div className="p-4">Loading...</div>;
+
     return (
-        <div className="flex flex-1 flex-col h-full bg-slate-100 ">
+        <div className="flex flex-1 flex-col h-full bg-slate-100">
             <div className="items-center flex justify-between p-4 border-b shadow-md bg-white">
                 <h1 className="text-sm font-bold text-gray-800">CREATE SONGS</h1>
                 <CustomBreadCrumb data={MediaControlCreateSongsBreadCrumbs} />
@@ -86,47 +133,62 @@ export default function CreateSong() {
                             />
                             {errors.name && <p className="text-red-500 text-sm">{errors.name.message}</p>}
                         </div>
-                        {/* Username Input */}
+
+                        {/* Duration (Auto-filled) */}
                         <div className="flex flex-col">
-                            <label htmlFor="description" className="mb-1 text-gray-700">
-                                Duration <span className="text-red-500">*</span>
+                            <label htmlFor="duration" className="mb-1 text-gray-700">
+                                Duration (Auto-filled) <span className="text-red-500">*</span>
                             </label>
                             <Input
-                                id="description"
+                                id="duration"
                                 type="number"
-                                placeholder="Enter your Duration"
-                                {...register("duration")}
+                                {...register("duration", { valueAsNumber: true })}
+                                readOnly
+                                disabled
                                 className={errors.duration ? "border-red-500" : ""}
                             />
                             {errors.duration && <p className="text-red-500 text-sm">{errors.duration.message}</p>}
                         </div>
-                        {/* Phone Number Input */}
+
                         <div className="flex flex-col">
-                            <label htmlFor="icon" className="mb-1 text-gray-700">
-                                Icon  
+                            <label htmlFor="iconFile" className="mb-1 text-gray-700">
+                                Icon <span className="text-red-500">*</span>
                             </label>
                             <Input
-                                id="icon"
+                                id="iconFile"
                                 type="file"
-                                accept=".png,.jpg,.jpeg,.svg"
-                                {...register("icon")}
-                                className={errors.icon  ? "border-red-500" : ""}
+                                accept="image/*"
+                                {...register("iconFile")}
+                                className={errors.iconFile ? "border-red-500" : ""}
                             />
-                            {errors.icon && <p className="text-red-500 text-sm">{errors.icon.message}</p>}
+                            {errors.iconFile && <p className="text-red-500 text-sm">{errors.iconFile.message}</p>}
+                            {iconSrc && (
+                                <img
+                                    src={iconSrc}
+                                    alt="Icon preview"
+                                    className="mt-2 max-h-40 max-w-40 rounded-md shadow-sm"
+                                />
+                            )}
                         </div>
+
+
+
+                        {/* Audio Upload */}
                         <div className="flex flex-col">
-                            <label htmlFor="phoneNumber" className="mb-1 text-gray-700">
-                                Song 
+                            <label htmlFor="iconFile" className="mb-1 text-gray-700">
+                                Song <span className="text-red-500">*</span>
                             </label>
                             <Input
-                                id="media"
+                                id="audioFile"
                                 type="file"
-                                accept=".mp3,audio/*"
-                                {...register("url")}
-                                className={errors.url ? "border-red-500" : ""}
+                                accept="audio/*"
+                                {...register("audioFile")}
+                                className={errors.audioFile ? "border-red-500" : ""}
                             />
-                            {errors.url && <p className="text-red-500 text-sm">{errors.url.message}</p>}
+                            {errors.audioFile && <p className="text-red-500 text-sm">{errors.audioFile.message}</p>}
+                            {audioSrc && <audio controls src={audioSrc} className="mt-2" />}
                         </div>
+
                         {/* Submit Button */}
                         <div className="col-span-full flex justify-start mt-4">
                             <button

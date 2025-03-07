@@ -16,12 +16,11 @@ export const StaffListHeadings = [
 ]
 export const MediaControlFlickListHeadings = [
     { display: "#", key: "index" },
-    { display: "Username", key: "username", sortable: true },
+    { display: "Username", key: "usernameAndPhoto" },
     { display: "Description", key: "description" },
     { display: "Repost Count", key: "repostCount", sortable: true },
-    { display: "Comment Visible", key: "commentVisible", sortable: true },
-    { display: "Phone Number", key: 'phoneNumber' },
     { display: "Suspended", key: 'suspended', sortable: true },
+    { display: "Created  At", key: "createdAt", sortable: true },
     { display: "Options", key: 'options' }
 ]
 export const MediaControlQuestListHeadings = [
@@ -49,7 +48,6 @@ export const MediaControlStoryListHeadings = [
     { display: "#", key: "index" },
     { display: "Caption ", key: "captionAndThumbnail", sortable: true },
     { display: "Type", key: "mediaType" },
-    { display: "Duration", key: "duration" },
     { display: "View Count", key: "viewCount", sortable: true },
     { display: "Suspended", key: "suspended", sortable: true },
     { display: "Options", key: "options" }
@@ -62,7 +60,6 @@ export const MediaControlSongListHeadings = [
     { display: "Duration", key: "duration" },
     { display: "Song", key: "url" },
     { display: "Used", key: "used", sortable: true },
-    { display: "Suspended", key: "suspended", sortable: true },
     { display: "Options", key: "options" }
 ]
 

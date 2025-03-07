@@ -10,7 +10,7 @@ import Link from "next/link";
 import useSWR from "swr";
 import { getFetcher } from "@/lib/fetcher";
 import { toast } from "sonner";
-import { Clock3, MoveDown, MoveUp, RefreshCcw, WifiOff } from "lucide-react";
+import { Clock3, Eye, MoveDown, MoveUp, RefreshCcw, Trash2, WifiOff } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import dynamic from "next/dynamic";
 import { usePermissionStore } from "@/store/permission-store";
@@ -19,7 +19,6 @@ import { RiSearchLine } from "@/components/icons/RiSearchLine";
 import { RiEqualizerFill } from "@/components/icons/RiEqualizerFill";
 import { RiRefreshLine } from "@/components/icons/RiRefreshLine_short";
 const NotFound = dynamic(() => import("@/components/TableNoData/noDataFound"), { ssr: false });
-
 export default function MediaControlQuestList() {
     const [searchTerm, setSearchTerm] = useState("");
     const [isOnline, setIsOnline] = useState(typeof navigator !== 'undefined' ? navigator.onLine : true);
@@ -41,9 +40,8 @@ export default function MediaControlQuestList() {
         }
         // Add query parameter based on selected tab
         params.append("skip", skip.toString());
-        return `${baseURL}/staff/get-all-staff?${params.toString()}`;
+        return `${baseURL}/media-control/quest?${params.toString()}`;
     };
-    ;
     const { data, error, isLoading, mutate } = useSWR<ApiResponse>(
         buildApiUrl(),
         getFetcher,
@@ -84,37 +82,34 @@ export default function MediaControlQuestList() {
             window.removeEventListener('offline', handleOffline);
         };
     }, [mutate]);
-    const handleDeleteStaff = async (staffId: string) => {
+    const handleDeleteQuest = async (questId: string) => {
         if (!isOnline) {
-            toast.error("Cannot delete staff while offline");
+            toast.error("Cannot delete quest while offline");
             return;
         }
         try {
             mutate(
                 (currentData: ApiResponse | undefined) => currentData ? {
                     ...currentData,
-                    STAFF: currentData.STAFF.filter(staff => staff._id !== staffId)
+                    QUESTS: currentData.QUESTS.filter(quest => quest._id !== questId)
                 } : currentData,
                 false
             );
-            const response = await fetch(`${baseURL}/staff/delete-staff/${staffId}`, {
+            const response = await fetch(`${baseURL}/media-control/quest/${questId}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });
-            if (!response.ok) throw new Error('Failed to delete staff');
-            toast.success("Staff member deleted successfully");
+            if (!response.ok) throw new Error('Failed to delete quest');
+            toast.success("Quest deleted successfully");
             mutate();
         } catch (error) {
-            toast.error("Failed to delete staff member");
+            toast.error("Failed to delete quest member");
             mutate();
         }
     };
-
     // Filter staff data based on search term
-    const filteredStaff = data?.STAFF.filter(staff =>
-        staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        staff.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        staff.email.toLowerCase().includes(searchTerm.toLowerCase())
+    const filteredQuest = data?.QUESTS?.filter(quest =>
+        quest.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
     const handleSort = (key: string) => {
         if (sortBy === key) {
@@ -174,20 +169,11 @@ export default function MediaControlQuestList() {
                                 onChange={(e) => setSearchTerm(e.target.value)}
                             />
                         </div>
-                        <div className="relative flex items-center w-full  sm:w-64 p-1 bg-white border rounded-sm">
-                            <Clock3 className="absolute left-0 mx-2 w-4 text-gray-500" />
-                            <input
-                                type="text"
-                                name="search"
-                                className="w-full pl-10 py-1 text-sm text-gray-700 placeholder-gray-500 bg-transparent border-none focus:outline-none focus:ring-5 focus:ring-indigo-600"
-                                placeholder="Search by date"
-                            />
-                        </div>
                         <button className="bg-purple-700 px-10 py-1.5 ml-2 rounded-sm flex items-center transition duration-300 ease-in-out hover:bg-opacity-80">
                             <RiEqualizerFill /><span className="ml-1 text-white">Search</span>
                         </button>
                         <button className="bg-red-400 px-10 py-1.5 ml-2 rounded-sm flex items-center transition duration-300 ease-in-out hover:bg-opacity-80">
-                            <RiRefreshLine /><span className="ml-1 text-white"> Reset</span>
+                            <RiRefreshLine /><span className="ml-1 text-white">Reset</span>
                         </button>
                     </div>
                     <div className="overflow-x-auto grid grid-cols-1">
@@ -248,10 +234,10 @@ export default function MediaControlQuestList() {
                             ) : error || !isOnline ? (
                                 <TableBody>
                                     <TableRow>
-                                            <TableCell colSpan={MediaControlQuestListHeadings.length} className="text-center py-6">
+                                        <TableCell colSpan={MediaControlQuestListHeadings.length} className="text-center py-6">
                                             <div className="flex flex-col items-center justify-center gap-2">
                                                 <WifiOff className="w-8 h-8 text-red-500" />
-                                                <p className="text-gray-500">Unable to load staff data</p>
+                                                <p className="text-gray-500">Unable to load quest data</p>
                                                 <button
                                                     onClick={() => mutate()}
                                                     className="text-purple-600 hover:text-purple-800 underline"
@@ -262,83 +248,60 @@ export default function MediaControlQuestList() {
                                         </TableCell>
                                     </TableRow>
                                 </TableBody>
-                            ) : !filteredStaff?.length ? (
+                            ) : !filteredQuest?.length ? (
                                 <TableBody>
                                     <TableRow>
-                                                <TableCell colSpan={MediaControlQuestListHeadings.length} className="text-center py-6">
+                                        <TableCell colSpan={MediaControlQuestListHeadings.length} className="text-center py-6">
                                             <NotFound />
-                                            <p className="text-gray-500 mt-2">No staff members found</p>
+                                            <p className="text-gray-500 mt-2">No quest found</p>
                                         </TableCell>
                                     </TableRow>
                                 </TableBody>
                             ) : (
                                 <TableBody>
-                                    {filteredStaff.map((staff, index) => (
-                                        <TableRow key={staff._id} className="hover:bg-gray-50">
+                                    {filteredQuest.map((quest, index) => (
+                                        <TableRow key={quest._id} className="hover:bg-gray-50">
                                             <TableCell className="text-sm font-normal">
                                                 {index + 1}
                                             </TableCell>
                                             <TableCell className="text-sm">
-                                                <div className="flex items-center">
-                                                    <img
-                                                        src={staff.profileImage}
-                                                        alt={staff.name}
-                                                        width={40}
-                                                        height={40}
-                                                        className="border-double border border-gray-400 p-0.5 mr-2"
-                                                    />
-                                                    <div>
-                                                        <p className="font-normal">{staff.name}</p>
-                                                        <p className="text-xs text-gray-500">{staff.role}</p>
-                                                    </div>
-                                                </div>
+                                                {quest.title}
+                                            </TableCell>
+                                            <TableCell className="text-sm font-normal truncate max-w-96">
+                                                {quest.description}
                                             </TableCell>
                                             <TableCell className="text-sm font-normal">
-                                                {staff.username}
-                                            </TableCell>
-                                            <TableCell className="text-sm font-normal">
-                                                {staff.email}
+                                                {quest.maxApplicants}
                                             </TableCell>
                                             <TableCell className="text-sm">
-                                                <label className="relative inline-block h-4 w-7 cursor-pointer rounded-full bg-gray-300 transition [-webkit-tap-highlight-color:_transparent] has-[:checked]:bg-purple-800">
-                                                    <input
-                                                        className="peer sr-only"
-                                                        type="checkbox"
-                                                        checked={staff.status}
-                                                        // onChange={() => hasPermission("updateAdmin") && handleUpdateStatusStaff(staff._id, staff.status)}
-                                                        disabled={!isOnline}
-                                                    />
-                                                    <span className="absolute inset-y-0 start-0 m-0.5 w-3 h-3 rounded-full bg-gray-300 ring-[4px] ring-inset ring-white transition-all peer-checked:translate-x-3 peer-checked:bg-white peer-checked:ring-transparent" />
-                                                </label>
+                                                {quest.totalAmount}
                                             </TableCell>
                                             <TableCell className="text-sm font-normal">
-                                                ADMIN
+                                                {quest.suspended ? "Suspended" : "Active"}
                                             </TableCell>
                                             {/* {hasAnyPermission(["updateAdmin", "deleteAdmin"]) && s */}
-                                            (
                                             <TableCell className="text-sm">
                                                 <div className="flex space-x-2">
                                                     {/* {hasPermission("updateAdmin") &&  */}
                                                     <Link
-                                                        href={`/staff/${staff._id}`}
-                                                        className={`text-yellow-500 hover:text-yellow-600 ${!isOnline ? 'pointer-events-none opacity-50' : ''}`}
+                                                        href={`/media-control/quest/${quest._id}`}
+                                                        className={`text-blue-500 hover:text-blue-600 ${!isOnline ? 'pointer-events-none opacity-50' : ''}`}
+                                                        title="View Quest"
                                                     >
-                                                        <RiPencilFill className="h-5 w-5" />
+                                                        <Eye className="h-5 w-5" />
                                                     </Link>
                                                     {/* } */}
                                                     {/* {hasPermission("deleteAdmin") && */}
-                                                    (
                                                     <button
-                                                        onClick={() => handleDeleteStaff(staff._id)}
+                                                        onClick={() => handleDeleteQuest(quest._id)}
                                                         disabled={!isOnline}
                                                         className={`text-red-500 hover:text-red-600 ${!isOnline ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                                        title="Delete Quest"
                                                     >
-                                                        <RiDeleteBinLine className="h-5 w-5" />
-                                                    </button>)
-                                                    {/* } */}
+                                                        <Trash2 className="h-5 w-5" />
+                                                    </button>
                                                 </div>
                                             </TableCell>
-                                            )
                                         </TableRow>
                                     ))}
                                 </TableBody>

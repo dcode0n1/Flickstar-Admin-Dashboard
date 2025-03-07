@@ -259,9 +259,7 @@ export default function UsersList() {
                             height={40}
                             className="border-double border border-gray-400 p-0.5 mr-2"
                           />
-                          <div>
-                            <p className="font-normal">{user.name}</p>
-                          </div>
+                            <span className="font-normal">{user.name}</span>
                         </div>
                       </TableCell>
                       <TableCell className="text-sm font-normal">

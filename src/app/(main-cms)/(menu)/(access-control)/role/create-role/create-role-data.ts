@@ -12,6 +12,15 @@ export const permissionsData = [
         ]
     },
     {
+        category: "Role",
+        permissions: [
+            { label: "View Role", value: Permission.ViewRole },
+            { label: "Update Role", value: Permission.UpdateRole },
+            { label: "Create Role", value: Permission.CreateRole },
+            { label: "Delete Role", value: Permission.DeleteRole }
+        ]
+    },
+    {
         category : "User",
         permissions: [
             { label: "View User", value: Permission.ViewUser },

@@ -108,7 +108,7 @@ export default function RolesList() {
                 false
             );
 
-            const response = await fetch(`${baseURL}/role/delete-role/${roleId}`, {
+            const response = await fetch(`${baseURL}/role/${roleId}`, {
                 method: 'DELETE',
                 credentials: 'include'
             });
@@ -213,36 +213,21 @@ export default function RolesList() {
                     className="p-2"
                 >
                     <div className="flex justify-end items-center m-4">
-                        {/* <div className="none"></div>
-                        {/* <div>
-                            <label className="text-sm">
-                                Show
-                                <select className="mx-2 p-1 border rounded">
-                                    <option>10</option>
-                                    <option>25</option>
-                                    <option>50</option>
-                                    <option>100</option>
-                                </select>
-                                Entries
-                            </label>
-                        </div> */}
-                        <div className=" flex items-center">
+                            <div  className="text-sm flex items-center space-x-2">
                             <span>Search:</span>
-                            <Input
-                                type="text"
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if (e.key === 'Enter') {
-                                        handleSearch();
-                                    }
-                                }}
-                                className="ml-2 p-1 border rounded"
-                                placeholder="Search by role name..."
-                                disabled={!isOnline || isLoading}
-                            />
-
-                        </div>
+                                <Input
+                                    type="text"
+                                    value={searchTerm}
+                                    onChange={(e) => setSearchTerm(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            handleSearch();
+                                        }
+                                    }}
+                                    placeholder="Search by name, username, or email..."
+                                    disabled={!isOnline || isLoading}
+                                />
+                            </div>
                     </div>
                     <div className="overflow-x-auto grid grid-cols-1">
                         <Table>

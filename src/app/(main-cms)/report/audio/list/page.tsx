@@ -279,7 +279,7 @@ export default function ReportAudioList() {
                       <TableCell className="text-sm">
                         <div className="flex items-center">
                           <img
-                            src={staff.profileImage}
+                            src={staff.image }
                             alt={staff.name}
                             width={40}
                             height={40}
