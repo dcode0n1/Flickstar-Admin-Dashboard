@@ -23,12 +23,12 @@ const QuestSchema = z.object({
     location: z.string().min(4, "Location is required"),
     lat: z.coerce.number().min(-90, "Invalid latitude").max(90, "Invalid latitude"),
     long: z.coerce.number().min(-180, "Invalid longitude").max(180, "Invalid longitude"),
-    media: z.instanceof(FileList)
-        .refine(files => files.length > 0, "At least one image is required")
+    media: z.array(z.instanceof(File)) // Validate an array of `File` objects
+        .nonempty("At least one image/video is required")
         .refine(files =>
-            Array.from(files).every(file => file.type.startsWith("image/") || file.type.startsWith("video/")),
-            "All files must be either image or a video"
-        ),
+            files.every(file => file.type.startsWith("image/") || file.type.startsWith("video/")),
+            "Only image/video files are allowed"
+        )
 });
 
 type QuestData = z.infer<typeof QuestSchema>;

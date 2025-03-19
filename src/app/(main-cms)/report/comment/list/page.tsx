@@ -39,11 +39,11 @@ export default function ReportCommentList() {
       params.append('sort', sortBy);
       params.append('order', sortOrder);
     }
+    params.append('type', 'comment')
     // Add query parameter based on selected tab
     params.append("skip", skip.toString());
-    return `${baseURL}/staff/get-all-staff?${params.toString()}`;
+    return `${baseURL}/report?${params.toString()}`;
   };
-  ;
   const { data, error, isLoading, mutate } = useSWR<ApiResponse>(
     buildApiUrl(),
     getFetcher,
@@ -111,7 +111,7 @@ export default function ReportCommentList() {
   };
 
   // Filter staff data based on search term
-  const filteredStaff = data?.STAFF.filter(staff =>
+  const filteredStaff = data?.STAFF?.filter(staff =>
     staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     staff.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
     staff.email.toLowerCase().includes(searchTerm.toLowerCase())
@@ -279,7 +279,7 @@ export default function ReportCommentList() {
                       <TableCell className="text-sm">
                         <div className="flex items-center">
                           <img
-                            src={staff.profileImage}
+                            src={staff.image}
                             alt={staff.name}
                             width={40}
                             height={40}

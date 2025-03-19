@@ -14,27 +14,20 @@ import { AccessControlUpdateStaffBreadCrumbs } from "@/constants/bread-crumbs";
 import { baseURL } from "@/lib/axioxWithAuth";
 import { getFetcher } from "@/lib/fetcher";
 import { useParams, useRouter } from "next/navigation";
+import { handleUploadToPresignedUrl } from "@/utils/utils";
 
-// Modified Zod schema for edit (making password optional)
+const R2_PUBLIC_URL = 'https://pub-301c1efdf41d428f9ab043c4d4ecbac9.r2.dev';
+
 const staffSchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
     username: z.string().min(8, { message: "Username must be at least 8 characters long" }),
     phone: z.string().optional().nullable(),
     email: z.string().email({ message: "Invalid email format" }),
-    password: z.string().min(5, { message: "Password must be at least 5 characters long" }).optional(),
-    confirmPassword: z.string().min(5, { message: "Confirm Password is required" }).optional(),
     role: z.string().min(1, { message: "Role is required" }),
     address: z.string().optional().nullable(),
-    profileImage: z.any().optional(),
-}).refine((data) => {
-    // Only validate passwords match if both are provided
-    if (data.password || data.confirmPassword) {
-        return data.password === data.confirmPassword;
-    }
-    return true;
-}, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
+    image: z.instanceof(FileList)
+        .refine(files => files.length > 0, "Profile image is required")
+        .refine(files => files[0]?.type.startsWith("image/"), "Invalid image format"),
 });
 
 type StaffData = z.infer<typeof staffSchema>;
@@ -45,34 +38,35 @@ interface Role {
 }
 
 export default function EditStaff() {
-    const {id} = useParams();
+    const { id } = useParams();
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [profileSrc, setProfileSrc] = useState<string | null>(null);
 
-    // Fetch existing staff data
-    const { data: staffData, error: staffError, mutate } = useSWR(
+    const { data: staffData, error: staffError } = useSWR(
         `${baseURL}/staff/${id}`,
         getFetcher
     );
-    // Fetch roles
+
     const { data: rolesData, error: rolesError } = useSWR<{ DROPROLES: Role[] }>(
         `${baseURL}/role-dropdown`,
         getFetcher
     );
+
     const {
         register,
         handleSubmit,
         formState: { errors },
         reset,
-        setValue,
+        watch,
     } = useForm<StaffData>({
         resolver: zodResolver(staffSchema),
     });
 
-    // Set form values when staff data is loaded
+    const profileImageList = watch("image");
+
     useEffect(() => {
-        if (staffData) {
+        if (staffData?.staffDetails) {
             const { staffDetails } = staffData;
             reset({
                 name: staffDetails.name,
@@ -82,58 +76,62 @@ export default function EditStaff() {
                 role: staffDetails.role,
                 address: staffDetails.address || '',
             });
+            if (staffDetails.image) {
+                setProfileSrc(staffDetails.image);
+            }
         }
     }, [staffData, reset]);
 
-    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        const file = event.target.files?.[0];
-        if (file) {
-            const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
-            const maxSize = 5 * 1024 * 1024; // 5MB
-
-            if (!validTypes.includes(file.type)) {
-                toast.error('Please upload a valid image file (JPEG, PNG, or GIF)');
-                return;
-            }
-            if (file.size > maxSize) {
-                toast.error('File size should be less than 5MB');
-                return;
-            }
-            setSelectedFile(file);
-            setValue('profileImage', file);
-        }
-    };
-
     useEffect(() => {
-        if (rolesData?.DROPROLES && staffData?.staffDetails) {
-            const selectedRole = rolesData.DROPROLES.find(
-                role => role._id == staffData.staffDetails.role
-            );
-            if (selectedRole) {
-                console.log('Selected role:', selectedRole.name);
-            }
+        if (profileImageList?.[0]) {
+            const file = profileImageList[0];
+            const url = URL.createObjectURL(file);
+            setProfileSrc(url);
+            return () => URL.revokeObjectURL(url);
         }
-    }, [rolesData, staffData]);
-
-
+    }, [profileImageList]);
 
     const onSubmit: SubmitHandler<StaffData> = async (formData) => {
         if (isSubmitting) return;
+        setIsSubmitting(true);
 
         try {
-            setIsSubmitting(true);
-            const { profileImage, ...rest } = formData;
+            let imageUrl: string | undefined;
+            if (formData.image?.[0]) {
+                const presignedResponse = await axios.post(
+                    `${baseURL}/staff/presigned-url`,
+                    {
+                        fileType: formData.image[0].type,
+                        staffId: id
+                    },
+                    { withCredentials: true }
+                );
+                const { profileImagePresignedUrl } = presignedResponse.data;
+                await handleUploadToPresignedUrl(formData.image[0], profileImagePresignedUrl);
+                imageUrl = `${R2_PUBLIC_URL}/staff/${id}/profile-image`;
+            }
+
+            const dataToUpdate: any = {
+                name: formData.name,
+                username: formData.username,
+                phone: formData.phone,
+                email: formData.email,
+                role: formData.role,
+                address: formData.address,
+            };
+            if (imageUrl) {
+                dataToUpdate.image = imageUrl;
+            }
+
             const response = await axios.put(
                 `${baseURL}/staff/${id}`,
-                rest,
-                {
-                    withCredentials: true,
-                }
+                dataToUpdate,
+                { withCredentials: true }
             );
+
             if (response.data.success) {
                 toast.success('Staff updated successfully');
-                router.push('list');
-                mutate(); // Update the cached data
+                router.push('/staff/list');
             } else {
                 throw new Error(response.data.message || 'Failed to update staff');
             }
@@ -223,7 +221,7 @@ export default function EditStaff() {
                         {/* Roles Dropdown */}
                         <div className="flex flex-col">
                             <label htmlFor="roleId" className="mb-1 text-gray-700">
-                                Roles <span className="text-red-500">*</span>
+                                Role <span className="text-red-500">*</span>
                             </label>
                             <CusInput
                                 type="select"
@@ -262,17 +260,15 @@ export default function EditStaff() {
                                 id="profileImage"
                                 type="file"
                                 accept="image/*"
-                                onChange={handleFileChange}
+                                {...register("image")}
                             />
-                            {selectedFile && (
-                                <p className="text-sm text-gray-500 mt-2">
-                                    Selected file: {selectedFile.name}
-                                </p>
-                            )}
-                            {staffData.profileImage && !selectedFile && (
-                                <p className="text-sm text-gray-500 mt-2">
-                                    Current profile image: {staffData.profileImage}
-                                </p>
+                            {errors.image && <p className="text-red-500 text-sm">{errors.image.message}</p>}
+                            {profileSrc && (
+                                <img
+                                    src={profileSrc}
+                                    alt="Profile preview"
+                                    className="mt-2 h-40 w-40 rounded-md shadow-sm"
+                                />
                             )}
                         </div>
 

@@ -39,9 +39,10 @@ export default function ReportFlickList() {
       params.append('sort', sortBy);
       params.append('order', sortOrder);
     }
+    params.append('type', 'flick')
     // Add query parameter based on selected tab
     params.append("skip", skip.toString());
-    return `${baseURL}/staff/get-all-staff?${params.toString()}`;
+    return `${baseURL}/report?${params.toString()}`;
   };
   ;
   const { data, error, isLoading, mutate } = useSWR<ApiResponse>(

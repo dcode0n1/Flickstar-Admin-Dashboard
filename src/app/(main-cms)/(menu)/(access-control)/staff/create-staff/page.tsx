@@ -61,7 +61,7 @@ export default function CreateStaff() {
         resolver: zodResolver(staffSchema),
     });
 
-    const profileImageList = watch("image") as FileList;
+    const profileImageList = watch("image");
 
     useEffect(() => {
         if (profileImageList?.length > 0) {
@@ -90,7 +90,7 @@ export default function CreateStaff() {
 
             await handleUploadToPresignedUrl(formData.image[0], profileImagePresignedUrl);
 
-            const { confirmPassword, image , ...rest } = formData
+            const { confirmPassword, image, ...rest } = formData
             const R2_PUBLIC_URL = 'https://pub-301c1efdf41d428f9ab043c4d4ecbac9.r2.dev'
             const response = await axios.post(
                 `${baseURL}/staff`,

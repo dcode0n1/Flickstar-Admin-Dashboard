@@ -39,9 +39,10 @@ export default function ReportStoryList() {
       params.append('sort', sortBy);
       params.append('order', sortOrder);
     }
+    params.append('type', 'story')
     // Add query parameter based on selected tab
     params.append("skip", skip.toString());
-    return `${baseURL}/staff/get-all-staff?${params.toString()}`;
+    return `${baseURL}/report?${params.toString()}`;
   };
   ;
   const { data, error, isLoading, mutate } = useSWR<ApiResponse>(
@@ -111,7 +112,7 @@ export default function ReportStoryList() {
   };
 
   // Filter staff data based on search term
-  const filteredStaff = data?.STAFF.filter(staff =>
+  const filteredStaff = data?.STAFF?.filter(staff =>
     staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     staff.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
     staff.email.toLowerCase().includes(searchTerm.toLowerCase())

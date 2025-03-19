@@ -111,7 +111,7 @@ export default function MediaControlStoryList() {
     };
 
     // Filter staff data based on search term
-    const filteredStaff = data?.STAFF.filter(staff =>
+    const filteredStaff = data?.STAFF?.filter(staff =>
         staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         staff.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
         staff.email.toLowerCase().includes(searchTerm.toLowerCase())
@@ -158,7 +158,8 @@ export default function MediaControlStoryList() {
             <div className="flex flex-1 flex-col m-4">
                 <CardWrapper
                     name="Story List"
-                    viewBtn={false}
+                    btnText="Add New Story"
+                    btnLink="/media-control/story/create-story"
                     className="p-2"
                 >
                     <div className="flex flex-wrap items-center m-2 gap-4 md:flex-2">

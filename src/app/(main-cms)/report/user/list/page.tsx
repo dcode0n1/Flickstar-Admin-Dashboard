@@ -39,9 +39,10 @@ export default function ReportUserList() {
             params.append('sort', sortBy);
             params.append('order', sortOrder);
         }
+        params.append('type', 'user')
         // Add query parameter based on selected tab
         params.append("skip", skip.toString());
-        return `${baseURL}/user?${params.toString()}`;
+        return `${baseURL}/report?${params.toString()}`;
     };
     ;
     const { data, error, isLoading, mutate } = useSWR<ApiResponse>(
@@ -279,7 +280,7 @@ export default function ReportUserList() {
                                             <TableCell className="text-sm">
                                                 <div className="flex items-center">
                                                     <img
-                                                        src={staff.profileImage}
+                                                        src={staff.image || "https://placehold.co/150x150"}
                                                         alt={staff.name}
                                                         width={40}
                                                         height={40}

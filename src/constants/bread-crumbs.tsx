@@ -153,6 +153,12 @@ export const MediaControlCreateQuestBreadCrumbs = [
     { name: "Create" }
 ]
 
+export const MediaControlCreateQuestApplicantBreadCrumbs = [
+    { name: "Home", link: "/dashboard" },
+    { name: "Quest Applicant", link: "list" },
+    { name: "Create" }
+]
+
 
 export const MediaControlCreateSongsBreadCrumbs  =  [
     { name: "Home", link: "/dashboard" },

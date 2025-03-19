@@ -31,7 +31,7 @@ const SongSchema = z.object({
 
 type SongData = z.infer<typeof SongSchema>;
 
-export default function CreateSong() {
+export default function CreateStory() {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [audioSrc, setAudioSrc] = useState<string | null>(null);
@@ -72,12 +72,11 @@ export default function CreateSong() {
     }, [audioFileList, iconFileList, setValue]);
     const onSubmit: SubmitHandler<SongData> = async (data) => {
         if (isSubmitting) return;
-        console.log( "====> data" , data)
         setIsSubmitting(true);
         try {
             const presignedResponse = await axios.post(`${baseURL}/media-control/song/presigned-url`, {
                 fileName: data.audioFile[0].name,
-                fileType : data.audioFile[0].type,
+                fileType: data.audioFile[0].type,
                 iconType: data.iconFile[0].type,
                 iconName: data.iconFile[0].name,
             }, {
@@ -85,6 +84,7 @@ export default function CreateSong() {
             }
             );
             console.log(presignedResponse)
+
             const { audioPresignedUrl, iconPresignedUrl, songId } = presignedResponse.data;
 
             // 2. Upload files to presigned URLs
@@ -96,8 +96,8 @@ export default function CreateSong() {
             await axios.post(`${baseURL}/media-control/song`, {
                 _id: songId,
                 name: data.name,
-                url: `${R2_PUBLIC_URL}/song/${songId}/${data.audioFile[0].name}` ,
-                icon: `${R2_PUBLIC_URL}/song/${songId}/${data.iconFile[0].name}` ,
+                url: `${R2_PUBLIC_URL}/song/${songId}/${data.audioFile[0].name}`,
+                icon: `${R2_PUBLIC_URL}/song/${songId}/${data.iconFile[0].name}`,
                 duration: data.duration,
             },
                 { withCredentials: true }
@@ -145,7 +145,7 @@ export default function CreateSong() {
                             <Input
                                 id="duration"
                                 type="number"
-                                // {...register("duration", { valueAsNumber: true })}
+                                {...register("duration", { valueAsNumber: true })}
                                 readOnly
                                 disabled
                                 className={errors.duration ? "border-red-500" : ""}

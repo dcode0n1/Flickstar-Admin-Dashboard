@@ -16,13 +16,13 @@ import dayjs from '@/utils/utils';
 import CustomBreadCrumb from '@/components/ui/custom-breadcrumbs';
 import { ReportAudioReplyBreadCrumbs } from '@/constants/bread-crumbs';
 
-const supportTicketReplySchema = z.object({
+const audioReportTicketSchema = z.object({
   message: z.string().min(1, "Message is required"),
-  attachments: z.array(z.any()).optional()
+  attachment: z.array(z.any()).optional()
 });
 
 
-type SupportTicketData = z.infer<typeof supportTicketReplySchema>;
+type SupportTicketData = z.infer<typeof audioReportTicketSchema>;
 
 export default function ReportAudioId() {
   const {id} = useParams();
@@ -35,15 +35,15 @@ export default function ReportAudioId() {
     control,
     setValue
   } = useForm<SupportTicketData>({
-    resolver: zodResolver(supportTicketReplySchema),
+    resolver: zodResolver(audioReportTicketSchema),
     defaultValues: {
       message: "",
-      attachments: []
+      attachment: []
     },
   });
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "attachments"
+    name: "attachment"
   });
   const closeTicket = async () => {
     try {
@@ -74,14 +74,14 @@ export default function ReportAudioId() {
         toast.error('File size should be less than 5MB');
         return;
       }
-      setValue(`attachments.${index}`, file);
+      setValue(`attachment.${index}`, file);
     };
   };
   const onSubmit: SubmitHandler<SupportTicketData> = async (data) => {
     console.log(data)
     try {
-      const { attachments, ...rest } = data;
-      const response = await axios.put(`${baseURL}/setting/ticket/${id}`, { ...rest, ...attachments }, {
+      const { attachment, ...rest } = data;
+      const response = await axios.put(`${baseURL}/setting/ticket/${id}`, { ...rest, ...attachment }, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
       });

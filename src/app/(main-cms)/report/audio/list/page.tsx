@@ -39,11 +39,11 @@ export default function ReportAudioList() {
       params.append('sort', sortBy);
       params.append('order', sortOrder);
     }
+    params.append('type' , 'audio')
     // Add query parameter based on selected tab
     params.append("skip", skip.toString());
-    return `${baseURL}/staff/get-all-staff?${params.toString()}`;
+    return `${baseURL}/report?${params.toString()}`;
   };
-  ;
   const { data, error, isLoading, mutate } = useSWR<ApiResponse>(
     buildApiUrl(),
     getFetcher,
@@ -65,6 +65,8 @@ export default function ReportAudioList() {
       errorRetryCount: 3
     }
   );
+
+  console.log(data)
   useEffect(() => {
     const handleOnline = () => {
       setIsOnline(true);
@@ -111,7 +113,7 @@ export default function ReportAudioList() {
   };
 
   // Filter staff data based on search term
-  const filteredStaff = data?.STAFF.filter(staff =>
+  const filteredStaff = data?.STAFF?.filter(staff =>
     staff.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     staff.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
     staff.email.toLowerCase().includes(searchTerm.toLowerCase())

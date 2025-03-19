@@ -56,9 +56,9 @@ export default function UserDetails() {
                         <span>Username</span>
                         <span>{USERDETAILS.username}</span>
                     </div>
-                    <div className="flex justify-between items-center gap-2 p-2">
+                    <div className="flex justify-between items-center gap-2 p-2 ">
                         <span>Flickstar Id</span>
-                        <span>{USERDETAILS._id}</span>
+                        <span >{USERDETAILS._id}</span>
                     </div>
                     <div className="flex justify-between items-center flex-wrap gap-2 p-2">
                         <span>Phone</span>

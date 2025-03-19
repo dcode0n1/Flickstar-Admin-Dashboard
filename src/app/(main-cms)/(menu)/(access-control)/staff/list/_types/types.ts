@@ -7,6 +7,7 @@ interface Staff {
     role: string;
     status: boolean;
     image: string;
+    createdAt: string;
 }
 
 interface ApiResponse {

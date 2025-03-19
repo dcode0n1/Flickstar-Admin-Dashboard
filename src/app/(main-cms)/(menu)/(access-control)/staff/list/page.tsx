@@ -343,7 +343,14 @@ export default function StaffList() {
                                                 </label>
                                             </TableCell>
                                             <TableCell className="text-sm font-normal">
-                                                ADMIN
+                                                {new Date(staff.createdAt).toLocaleDateString('en-US', {
+                                                    year: 'numeric',
+                                                    month: 'short',
+                                                    day: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit',
+                                                    hour12: true
+                                                })}
                                             </TableCell>
                                             {hasAnyPermission(["updateAdmin", "deleteAdmin"]) && (
                                                 <TableCell className="text-sm">
