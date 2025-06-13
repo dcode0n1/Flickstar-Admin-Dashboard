@@ -12,7 +12,6 @@ import { useRouter } from "next/navigation";
 import CustomBreadCrumb from "@/components/ui/custom-breadcrumbs";
 import { MediaControlCreateQuestBreadCrumbs } from "@/constants/bread-crumbs";
 import { handleUploadToPresignedUrl } from "@/utils/utils";
-
 // Zod schema for quest
 const QuestSchema = z.object({
     title: z.string().min(4, "Title is required"),
@@ -23,21 +22,15 @@ const QuestSchema = z.object({
     location: z.string().min(4, "Location is required"),
     lat: z.coerce.number().min(-90, "Invalid latitude").max(90, "Invalid latitude"),
     long: z.coerce.number().min(-180, "Invalid longitude").max(180, "Invalid longitude"),
-    media: z.array(z.instanceof(File)) // Validate an array of `File` objects
-        .nonempty("At least one image/video is required")
-        .refine(files =>
-            files.every(file => file.type.startsWith("image/") || file.type.startsWith("video/")),
-            "Only image/video files are allowed"
-        )
+    media:  z.instanceof(FileList)
+        .refine(files => files.length > 0, "Profile image is required")
+        .refine(files => files[0]?.type.startsWith("image/"), "Invalid image format"),
 });
-
 type QuestData = z.infer<typeof QuestSchema>;
-
 export default function CreateQuest() {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [mediaPreviews, setMediaPreviews] = useState<Array<{ url: string; type: string }>>([]);
-
     const {
         register,
         handleSubmit,
@@ -50,9 +43,7 @@ export default function CreateQuest() {
             long: 75.7255187
         }
     });
-
     const mediaFileList = watch("media");
-
     // Generate previews for selected media files
     useEffect(() => {
         if (mediaFileList?.length > 0) {
@@ -62,7 +53,6 @@ export default function CreateQuest() {
                 type: file.type
             }));
             setMediaPreviews(newPreviews);
-
             return () => {
                 newPreviews.forEach(preview => URL.revokeObjectURL(preview.url));
             };
@@ -70,15 +60,12 @@ export default function CreateQuest() {
             setMediaPreviews([]);
         }
     }, [mediaFileList]);
-
     const onSubmit: SubmitHandler<QuestData> = async (formData) => {
         if (isSubmitting) return;
         setIsSubmitting(true);
-
         try {
             const mediaFiles = Array.from(formData.media);
             console.log("====> mediaFiles", mediaFiles)
-
             // 1. Get presigned URLs for all media files
             const presignedResponse = await axios.post(
                 `${baseURL}/media-control/quest/presigned-url`,
@@ -116,7 +103,6 @@ export default function CreateQuest() {
                 },
                 { withCredentials: true }
             );
-
             toast.success('Quest created successfully');
             router.push('list');
         } catch (error: any) {
@@ -126,7 +112,6 @@ export default function CreateQuest() {
             setIsSubmitting(false);
         }
     };
-
     return (
         <div className="flex flex-1 flex-col h-full bg-slate-100 ">
             <div className="items-center flex justify-between p-4 border-b shadow-md bg-white">
@@ -150,7 +135,6 @@ export default function CreateQuest() {
                             />
                             {errors.title && <p className="text-red-500 text-sm">{errors.title.message}</p>}
                         </div>
-
                         {/* Description Input */}
                         <div className="flex flex-col">
                             <label htmlFor="description" className="mb-1 text-gray-700">
@@ -165,7 +149,6 @@ export default function CreateQuest() {
                             />
                             {errors.description && <p className="text-red-500 text-sm">{errors.description.message}</p>}
                         </div>
-
                         {/* Media Upload */}
                         <div className="flex flex-col">
                             <label htmlFor="media" className="mb-1 text-gray-700">
@@ -191,7 +174,6 @@ export default function CreateQuest() {
                                             Your browser does not support the video tag.
                                         </video>
                                     ) : (
-
                                         <img
                                             key={index}
                                             src={preview.url}
@@ -202,7 +184,6 @@ export default function CreateQuest() {
                                 ))}
                             </div>
                         </div>
-
                         {/* Mode Selection */}
                         <div className="flex flex-col">
                             <label className="mb-1 font-normal" htmlFor='mode'>
@@ -218,7 +199,6 @@ export default function CreateQuest() {
                             </select>
                             {errors.mode && <p className="text-sm text-red-500">{errors.mode.message}</p>}
                         </div>
-
                         {/* Max Applicants */}
                         <div className="flex flex-col">
                             <label htmlFor="maxApplicants" className="mb-1 text-gray-700">
@@ -233,7 +213,6 @@ export default function CreateQuest() {
                             />
                             {errors.maxApplicants && <p className="text-red-500 text-sm">{errors.maxApplicants.message}</p>}
                         </div>
-
                         {/* Total Amount */}
                         <div className="flex flex-col">
                             <label htmlFor="totalAmount" className="mb-1 text-gray-700">
@@ -248,7 +227,6 @@ export default function CreateQuest() {
                             />
                             {errors.totalAmount && <p className="text-red-500 text-sm">{errors.totalAmount.message}</p>}
                         </div>
-
                         {/* Location */}
                         <div className="flex flex-col col-span-2">
                             <label htmlFor="location" className="mb-1 text-gray-700">
@@ -263,7 +241,6 @@ export default function CreateQuest() {
                             />
                             {errors.location && <p className="text-red-500 text-sm">{errors.location.message}</p>}
                         </div>
-
                         {/* Latitude */}
                         <div className="flex flex-col col-span-2">
                             <label htmlFor="coords" className="mb-1 text-gray-700">
@@ -294,7 +271,6 @@ export default function CreateQuest() {
                             />
                             {errors.long && <p className="text-red-500 text-sm">{errors.long.message}</p>}
                         </div>
-
                         {/* Submit Button */}
                         <div className="col-span-full flex justify-start mt-4">
                             <button

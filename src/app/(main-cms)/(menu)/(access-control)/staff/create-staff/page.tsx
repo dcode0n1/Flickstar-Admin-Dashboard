@@ -11,8 +11,7 @@ import { Input } from "@/components/ui/input";
 import CusInput from "@/components/CustomInput";
 import { baseURL } from "@/lib/axioxWithAuth";
 import { getFetcher } from "@/lib/fetcher";
-import { useRouter } from "next/navigation";
-import { watch } from "fs";
+import { useRouter } from "next/navigation"
 import { handleUploadToPresignedUrl } from "@/utils/utils";
 
 // Zod schema for create staff - making password required

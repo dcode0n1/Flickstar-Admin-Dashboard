@@ -18,13 +18,11 @@ const SongSchema = z.object({
     name: z.string().min(4, "Name is required"),
 
     // Validate an array of File (instead of FileList)
-    audioFile: z.array(z.instanceof(File))
-        .nonempty("Audio file is required") // Ensures at least one file
-        .refine(files => files[0]?.type.startsWith("audio/"), "Invalid audio format"),
+    audioFile: z.any(),
 
-    iconFile: z.array(z.instanceof(File))
-        .nonempty("Icon is required") // Ensures at least one file
-        .refine(files => files[0]?.type.startsWith("image/"), "Invalid image format"),
+    iconFile: z.any(),
+        // .nonempty("Icon is required") // Ensures at least one file
+        // .refine(files => files[0]?.type.startsWith("image/"), "Invalid image format"),
 
     duration: z.number().min(1, "Duration must be at least 1 second") // More strict than `.positive()`
 });
@@ -164,7 +162,7 @@ export default function CreateSong() {
                                 {...register("iconFile")}
                                 className={errors.iconFile ? "border-red-500" : ""}
                             />
-                            {errors.iconFile && <p className="text-red-500 text-sm">{errors.iconFile.message}</p>}
+                            {/* {errors.iconFile && <p className="text-red-500 text-sm">{errors.iconFile.message}</p>} */}
                             {iconSrc && (
                                 <img
                                     src={iconSrc}
@@ -188,7 +186,7 @@ export default function CreateSong() {
                                 {...register("audioFile")}
                                 className={errors.audioFile ? "border-red-500" : ""}
                             />
-                            {errors.audioFile && <p className="text-red-500 text-sm">{errors.audioFile.message}</p>}
+                            {/* {errors.audioFile && <p className="text-red-500 text-sm">{errors.audioFile.message}</p>} */}
                             {audioSrc && <audio controls src={audioSrc} className="mt-2" />}
                         </div>
 
