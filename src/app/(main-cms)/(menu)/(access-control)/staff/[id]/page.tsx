@@ -18,6 +18,14 @@ import { handleUploadToPresignedUrl } from "@/utils/utils";
 
 const R2_PUBLIC_URL = 'https://pub-301c1efdf41d428f9ab043c4d4ecbac9.r2.dev';
 
+const isClient = typeof window !== "undefined";
+const photoField = isClient
+    ? z
+        .any()
+        .refine((val) => val instanceof FileList && val.length > 0, "Profile photo is required")
+        .refine((val) => val[0]?.type.startsWith("image/"), "Invalid image format")
+    : z.any();
+
 const staffSchema = z.object({
     name: z.string().min(1, { message: "Name is required" }),
     username: z.string().min(8, { message: "Username must be at least 8 characters long" }),
@@ -25,11 +33,8 @@ const staffSchema = z.object({
     email: z.string().email({ message: "Invalid email format" }),
     role: z.string().min(1, { message: "Role is required" }),
     address: z.string().optional().nullable(),
-    image: z.instanceof(FileList)
-        .refine(files => files.length > 0, "Profile image is required")
-        .refine(files => files[0]?.type.startsWith("image/"), "Invalid image format"),
+    photo: photoField,
 });
-
 type StaffData = z.infer<typeof staffSchema>;
 
 interface Role {
@@ -63,7 +68,7 @@ export default function EditStaff() {
         resolver: zodResolver(staffSchema),
     });
 
-    const profileImageList = watch("image");
+    const profileImageList = watch("photo");
 
     useEffect(() => {
         if (staffData?.staffDetails) {
@@ -76,8 +81,8 @@ export default function EditStaff() {
                 role: staffDetails.role,
                 address: staffDetails.address || '',
             });
-            if (staffDetails.image) {
-                setProfileSrc(staffDetails.image);
+            if (staffDetails.photo) {
+                setProfileSrc(staffDetails.photo);
             }
         }
     }, [staffData, reset]);
@@ -95,19 +100,21 @@ export default function EditStaff() {
         if (isSubmitting) return;
         setIsSubmitting(true);
 
+        console.log("====> formData", formData)
+
         try {
             let imageUrl: string | undefined;
-            if (formData.image?.[0]) {
+            if (formData.photo?.[0]) {
                 const presignedResponse = await axios.post(
                     `${baseURL}/staff/presigned-url`,
                     {
-                        fileType: formData.image[0].type,
+                        fileType: formData.photo[0].type,
                         staffId: id
                     },
                     { withCredentials: true }
                 );
                 const { profileImagePresignedUrl } = presignedResponse.data;
-                await handleUploadToPresignedUrl(formData.image[0], profileImagePresignedUrl);
+                await handleUploadToPresignedUrl(formData.photo[0], profileImagePresignedUrl);
                 imageUrl = `${R2_PUBLIC_URL}/staff/${id}/profile-image`;
             }
 
@@ -120,7 +127,7 @@ export default function EditStaff() {
                 address: formData.address,
             };
             if (imageUrl) {
-                dataToUpdate.image = imageUrl;
+                dataToUpdate.photo = imageUrl;
             }
 
             const response = await axios.put(
@@ -253,16 +260,18 @@ export default function EditStaff() {
 
                         {/* Profile Image Input */}
                         <div className="flex flex-col">
-                            <label htmlFor="profileImage" className="mb-1 text-gray-700">
-                                Profile Image
+                            <label htmlFor="profilePhoto" className="mb-1 text-gray-700">
+                                Profile Photo
                             </label>
                             <Input
-                                id="profileImage"
+                                id="profilePhoto"
                                 type="file"
                                 accept="image/*"
-                                {...register("image")}
+                                {...register("photo")}
                             />
-                            {errors.image && <p className="text-red-500 text-sm">{errors.image.message}</p>}
+                            {typeof errors.photo?.message === "string" && (
+                                <p className="text-red-500 text-sm">{errors.photo.message}</p>
+                            )}
                             {profileSrc && (
                                 <img
                                     src={profileSrc}

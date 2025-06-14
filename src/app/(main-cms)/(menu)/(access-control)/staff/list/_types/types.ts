@@ -6,7 +6,7 @@ interface Staff {
     email: string;
     role: string;
     status: boolean;
-    image: string;
+    photo: string;
     createdAt: string;
 }
 

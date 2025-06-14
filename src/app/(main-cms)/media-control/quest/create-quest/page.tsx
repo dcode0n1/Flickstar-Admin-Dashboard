@@ -12,6 +12,8 @@ import { useRouter } from "next/navigation";
 import CustomBreadCrumb from "@/components/ui/custom-breadcrumbs";
 import { MediaControlCreateQuestBreadCrumbs } from "@/constants/bread-crumbs";
 import { handleUploadToPresignedUrl } from "@/utils/utils";
+const isClient = typeof window !== "undefined";
+
 // Zod schema for quest
 const QuestSchema = z.object({
     title: z.string().min(4, "Title is required"),
@@ -22,9 +24,23 @@ const QuestSchema = z.object({
     location: z.string().min(4, "Location is required"),
     lat: z.coerce.number().min(-90, "Invalid latitude").max(90, "Invalid latitude"),
     long: z.coerce.number().min(-180, "Invalid longitude").max(180, "Invalid longitude"),
-    media:  z.instanceof(FileList)
-        .refine(files => files.length > 0, "Profile image is required")
-        .refine(files => files[0]?.type.startsWith("image/"), "Invalid image format"),
+    media: isClient
+        ? z.any()
+            .refine(
+                (files) => {
+                    if (!files) return false;
+                    return files instanceof FileList && files.length > 0;
+                },
+                "Media files are required"
+            )
+            .refine(
+                (files) => {
+                    if (!files || !files[0]) return false;
+                    return files[0].type.startsWith("image/") || files[0].type.startsWith("video/");
+                },
+                "Invalid media format. Only images and videos are allowed"
+            )
+        : z.any().optional(),
 });
 type QuestData = z.infer<typeof QuestSchema>;
 export default function CreateQuest() {
@@ -47,10 +63,10 @@ export default function CreateQuest() {
     // Generate previews for selected media files
     useEffect(() => {
         if (mediaFileList?.length > 0) {
-            const files = Array.from(mediaFileList);
+            const files = Array.from(mediaFileList as FileList);
             const newPreviews = files.map(file => ({
-                url: URL.createObjectURL(file),
-                type: file.type
+                url: URL.createObjectURL(file as Blob),
+                type: (file as File).type
             }));
             setMediaPreviews(newPreviews);
             return () => {
@@ -64,7 +80,7 @@ export default function CreateQuest() {
         if (isSubmitting) return;
         setIsSubmitting(true);
         try {
-            const mediaFiles = Array.from(formData.media);
+            const mediaFiles = Array.from(formData.media as FileList);
             console.log("====> mediaFiles", mediaFiles)
             // 1. Get presigned URLs for all media files
             const presignedResponse = await axios.post(
@@ -99,7 +115,7 @@ export default function CreateQuest() {
                         long
                     },
                     ...rest,
-                    media: mediaUrls, // Ensure correct field name
+                    media: mediaUrls,
                 },
                 { withCredentials: true }
             );
@@ -162,7 +178,7 @@ export default function CreateQuest() {
                                 {...register("media")}
                                 className={errors.media ? "border-red-500" : ""}
                             />
-                            {errors.media && <p className="text-red-500 text-sm">{errors.media.message}</p>}
+                            {errors.media && <p className="text-red-500 text-sm">{errors.media.message?.toString()}</p>}
                             <div className="flex flex-wrap gap-2 mt-2">
                                 {mediaPreviews?.map((preview, index) => (
                                     preview.type.startsWith('video/') ? (

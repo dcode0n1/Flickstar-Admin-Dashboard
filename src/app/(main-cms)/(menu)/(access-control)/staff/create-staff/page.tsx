@@ -14,25 +14,44 @@ import { getFetcher } from "@/lib/fetcher";
 import { useRouter } from "next/navigation"
 import { handleUploadToPresignedUrl } from "@/utils/utils";
 
-// Zod schema for create staff - making password required
-const staffSchema = z.object({
-    name: z.string().min(1, { message: "Name is required" }),
-    username: z.string().min(8, { message: "Username must be at least 8 characters long" }),
-    phone: z.string().optional().nullable(),
-    email: z.string().email({ message: "Invalid email format" }),
-    password: z.string().min(5, { message: "Password must be at least 5 characters long" }),
-    confirmPassword: z.string().min(5, { message: "Confirm Password is required" }),
-    role: z.string().min(1, { message: "Role is required" }),
-    address: z.string().optional().nullable(),
-    image: z.instanceof(FileList)
-        .refine(files => files.length > 0, "Profile image is required")
-        .refine(files => files[0]?.type.startsWith("image/"), "Invalid image format"),
-}).refine((data) => {
-    return data.password === data.confirmPassword;
-}, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-});
+const isClient = typeof window !== "undefined";
+
+const imageField = isClient
+    ? z
+        .any()
+        .refine(
+            (files) => {
+                if (!files) return false;
+                return files instanceof FileList && files.length > 0;
+            },
+            "Profile image is required"
+        )
+        .refine(
+            (files) => {
+                if (!files || !files[0]) return false;
+                return files[0].type.startsWith("image/");
+            },
+            "Invalid image format"
+        )
+    : z.any().optional(); // skip validation on the server
+
+const staffSchema = z
+    .object({
+        name: z.string().min(1, { message: "Name is required" }),
+        username: z.string().min(8, { message: "Username must be at least 8 characters long" }),
+        phone: z.string().optional().nullable(),
+        email: z.string().email({ message: "Invalid email format" }),
+        password: z.string().min(5, { message: "Password must be at least 5 characters long" }),
+        confirmPassword: z.string().min(5, { message: "Confirm Password is required" }),
+        role: z.string().min(1, { message: "Role is required" }),
+        address: z.string().optional().nullable(),
+        image: imageField,
+    })
+    .refine((data) => data.password === data.confirmPassword, {
+        message: "Passwords do not match",
+        path: ["confirmPassword"],
+    });
+
 
 type StaffData = z.infer<typeof staffSchema>;
 
@@ -268,7 +287,9 @@ export default function CreateStaff() {
                                 {...register("image")}
                                 className={errors.image ? "border-red-500" : ""}
                             />
-                            {errors.image && <p className="text-red-500 text-sm">{errors.image.message}</p>}
+                            {typeof errors.image?.message === "string" && (
+                                <p className="text-red-500 text-sm">{errors.image.message}</p>
+                            )}
                             {profileSrc && (
                                 <img
                                     src={profileSrc}
