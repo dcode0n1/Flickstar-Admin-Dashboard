@@ -279,7 +279,7 @@ export default function MediaControlAudioList() {
                                             <TableCell className="text-sm">
                                                 <div className="flex items-center">
                                                     <img
-                                                        src={staff.image}
+                                                        src={staff.photo}
                                                         alt={staff.name}
                                                         width={40}
                                                         height={40}

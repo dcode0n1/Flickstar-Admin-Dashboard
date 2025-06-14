@@ -280,7 +280,7 @@ export default function ReportUserList() {
                                             <TableCell className="text-sm">
                                                 <div className="flex items-center">
                                                     <img
-                                                        src={staff.image || "https://placehold.co/150x150"}
+                                                        src={staff.photo || "https://placehold.co/150x150"}
                                                         alt={staff.name}
                                                         width={40}
                                                         height={40}
