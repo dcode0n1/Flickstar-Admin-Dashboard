@@ -33,7 +33,7 @@ export default function AuthPage() {
 
     const onSubmit = async (data: LoginForm) => {
         try {
-            const response = await fetch('http://localhost:4002/api/login', {
+            const response = await fetch('https://135.235.193.1/api/login', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({fcmToken : "esehihai" , ...data}),

@@ -13,18 +13,60 @@ import CustomBreadCrumb from "@/components/ui/custom-breadcrumbs";
 import { MediaControlCreateSongsBreadCrumbs } from "@/constants/bread-crumbs";
 import { handleUploadToPresignedUrl } from "@/utils/utils";
 
+const isClient = typeof window !== "undefined";
+
 // Zod schema for song metadata
 const SongSchema = z.object({
     name: z.string().min(4, "Name is required"),
-
-    // Validate an array of File (instead of FileList)
-    audioFile: z.any(),
-
-    iconFile: z.any(),
-        // .nonempty("Icon is required") // Ensures at least one file
-        // .refine(files => files[0]?.type.startsWith("image/"), "Invalid image format"),
-
-    duration: z.number().min(1, "Duration must be at least 1 second") // More strict than `.positive()`
+    audioFile: isClient
+        ? z.any()
+            .refine(
+                (files) => {
+                    if (!files) return false;
+                    return files instanceof FileList && files.length > 0;
+                },
+                "Audio file is required"
+            )
+            .refine(
+                (files) => {
+                    if (!files || !files[0]) return false;
+                    return files[0].type.startsWith("audio/");
+                },
+                "Invalid audio format. Only audio files are allowed"
+            )
+            .refine(
+                (files) => {
+                    if (!files || !files[0]) return false;
+                    return files[0].size <= 50 * 1024 * 1024;
+                },
+                "Audio file must be less than 50MB"
+            )
+        : z.any().optional(),
+    iconFile: isClient
+        ? z.any()
+            .refine(
+                (files) => {
+                    if (!files) return false;
+                    return files instanceof FileList && files.length > 0;
+                },
+                "Icon file is required"
+            )
+            .refine(
+                (files) => {
+                    if (!files || !files[0]) return false;
+                    return files[0].type.startsWith("image/");
+                },
+                "Invalid image format. Only images are allowed"
+            )
+            .refine(
+                (files) => {
+                    if (!files || !files[0]) return false;
+                    return files[0].size <= 5 * 1024 * 1024;
+                },
+                "Icon file must be less than 5MB"
+            )
+        : z.any().optional(),
+    duration: z.number().min(1, "Duration must be at least 1 second")
 });
 
 type SongData = z.infer<typeof SongSchema>;
@@ -33,14 +75,14 @@ export default function CreateSong() {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [audioSrc, setAudioSrc] = useState<string | null>(null);
-    const [iconSrc, setIconSrc] = useState<string | null>(null); // New state for icon preview
+    const [iconSrc, setIconSrc] = useState<string | null>(null);
 
     const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm<SongData>({
         resolver: zodResolver(SongSchema),
     });
 
     const audioFileList = watch("audioFile");
-    const iconFileList = watch("iconFile")
+    const iconFileList = watch("iconFile");
 
     // Handle audio file preview and duration calculation
     useEffect(() => {
@@ -57,17 +99,17 @@ export default function CreateSong() {
             audio.onerror = () => {
                 toast.error("Invalid audio file. Please try another one.");
             };
-            if (iconFileList?.length > 0) {
-                const file = iconFileList[0];
-                const url = URL.createObjectURL(file);
-                setIconSrc(url);
-                // Cleanup object URL
-                return () => URL.revokeObjectURL(url);
-            } else {
-                setIconSrc(null);
-            }
+            return () => URL.revokeObjectURL(url);
+        }
+
+        if (iconFileList?.length > 0) {
+            const file = iconFileList[0];
+            const url = URL.createObjectURL(file);
+            setIconSrc(url);
+            return () => URL.revokeObjectURL(url);
         }
     }, [audioFileList, iconFileList, setValue]);
+
     const onSubmit: SubmitHandler<SongData> = async (data) => {
         if (isSubmitting) return;
         console.log( "====> data" , data)
@@ -143,7 +185,6 @@ export default function CreateSong() {
                             <Input
                                 id="duration"
                                 type="number"
-                                // {...register("duration", { valueAsNumber: true })}
                                 readOnly
                                 disabled
                                 className={errors.duration ? "border-red-500" : ""}
@@ -151,6 +192,7 @@ export default function CreateSong() {
                             {errors.duration && <p className="text-red-500 text-sm">{errors.duration.message}</p>}
                         </div>
 
+                        {/* Icon Upload */}
                         <div className="flex flex-col">
                             <label htmlFor="iconFile" className="mb-1 text-gray-700">
                                 Icon <span className="text-red-500">*</span>
@@ -162,7 +204,7 @@ export default function CreateSong() {
                                 {...register("iconFile")}
                                 className={errors.iconFile ? "border-red-500" : ""}
                             />
-                            {/* {errors.iconFile && <p className="text-red-500 text-sm">{errors.iconFile.message}</p>} */}
+                            {errors.iconFile && <p className="text-red-500 text-sm">{errors.iconFile.message?.toString()}</p>}
                             {iconSrc && (
                                 <img
                                     src={iconSrc}
@@ -172,11 +214,9 @@ export default function CreateSong() {
                             )}
                         </div>
 
-
-
                         {/* Audio Upload */}
                         <div className="flex flex-col">
-                            <label htmlFor="iconFile" className="mb-1 text-gray-700">
+                            <label htmlFor="audioFile" className="mb-1 text-gray-700">
                                 Song <span className="text-red-500">*</span>
                             </label>
                             <Input
@@ -186,8 +226,12 @@ export default function CreateSong() {
                                 {...register("audioFile")}
                                 className={errors.audioFile ? "border-red-500" : ""}
                             />
-                            {/* {errors.audioFile && <p className="text-red-500 text-sm">{errors.audioFile.message}</p>} */}
-                            {audioSrc && <audio controls src={audioSrc} className="mt-2" />}
+                            {errors.audioFile && <p className="text-red-500 text-sm">{errors.audioFile.message?.toString()}</p>}
+                            {audioSrc && (
+                                <div className="mt-2">
+                                    <audio controls src={audioSrc} className="w-full" />
+                                </div>
+                            )}
                         </div>
 
                         {/* Submit Button */}
