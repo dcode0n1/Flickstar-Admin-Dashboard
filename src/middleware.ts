@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { publicPaths, protectedPathsPermissions } from "@/constants/middleware-constants";
 import { jwtVerify, errors as joseErrors } from 'jose';
+import { env } from './constants/env';
 
 export async function middleware(req: NextRequest) {
 
@@ -23,6 +24,8 @@ export async function middleware(req: NextRequest) {
 
     try {
         // Decode and verify the JWT token
+        console.log("Verifying JWT token...");
+        console.log("======>" , process.env.JWT_SECRET);
         const secret = new TextEncoder().encode(process.env.JWT_SECRET || 'flickstar');
         const { payload } = await jwtVerify(token, secret);
         const { permissions, staffId } = payload as { permissions: string[] , staffId :string };
@@ -71,7 +74,7 @@ export async function middleware(req: NextRequest) {
 // Helper function to refresh token
 async function refreshAuthToken(refreshToken: string) {
     try {
-        const refreshResponse = await fetch('http://localhost:4002/api/revalidate', {
+        const refreshResponse = await fetch(`${env.BACKEND_URL}/revalidate`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ refreshToken }),
