@@ -3,7 +3,6 @@ import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { publicPaths, protectedPathsPermissions } from "@/constants/middleware-constants";
 import { jwtVerify, errors as joseErrors } from 'jose';
-import { env } from './constants/env';
 
 export async function middleware(req: NextRequest) {
 
@@ -74,7 +73,7 @@ export async function middleware(req: NextRequest) {
 // Helper function to refresh token
 async function refreshAuthToken(refreshToken: string) {
     try {
-        const refreshResponse = await fetch(`${env.BACKEND_URL}/revalidate`, {
+        const refreshResponse = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL}/revalidate`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ refreshToken }),
