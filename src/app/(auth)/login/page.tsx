@@ -33,8 +33,6 @@
         });
 
         const onSubmit = async (data: LoginForm) => {
-            console.log("====> data", data);
-            console.log("====> env", env.BACKEND_URL);
             try {
                 const response = await fetch(`${env.BACKEND_URL}/login`, {
                     method: 'POST',
@@ -42,7 +40,6 @@
                     body: JSON.stringify({fcmToken : "esehihai" , ...data}),
                     credentials: 'include',
                 }).then((res) => res.json());
-                console.log("====> response", response)
                 if (response.success) {
                     toast.success('Login successful');
                     router.push('/dashboard');

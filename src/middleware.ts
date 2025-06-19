@@ -5,9 +5,13 @@ import { publicPaths, protectedPathsPermissions } from "@/constants/middleware-c
 import { jwtVerify, errors as joseErrors } from 'jose';
 
 export async function middleware(req: NextRequest) {
+
     const url = req.nextUrl.clone();
+    console.log("Middleware triggered for path:", req.nextUrl.pathname);
     let token = req.cookies.get("x-access-token")?.value;
+    console.log("Access Token:", token);
     const refreshToken = req.cookies.get("x-refresh-token")?.value;
+    console.log("Refresh Token:", refreshToken);
 
     if (!token) {
         if (!publicPaths.includes(req.nextUrl.pathname)) {
